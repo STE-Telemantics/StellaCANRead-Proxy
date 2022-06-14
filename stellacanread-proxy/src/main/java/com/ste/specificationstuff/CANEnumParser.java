@@ -383,6 +383,37 @@ public class CANEnumParser {
 		System.out.println();
 	}
 
+    /**
+     * Print out all the unique datatypes that are present in the messages.csv file.
+     *
+     * Requested by Mathijs Moonen
+     */
+    public void printUniqueMessageTypes() {
+        // Set up a CANParser object and parse the messages.csv file
+        CANParser cp = new CANParser();
+        List<MessageObject> messageList = cp.parseMessagesDefault();
+
+        // Collect *all* the datatypes in an ArrayList. We'll pass this list to the printUniqueTypes function
+        List<String> allTypes = new ArrayList<>();
+
+        // Iterate over all the messages in the list and add their data types to an ArrayList
+        for (MessageObject mo : messageList) {
+
+            // Get the message types from this message object
+            String[] messageTypes = mo.getDataTypes();
+
+            // Add the message types for this message to the Arraylist
+            for (String mt : messageTypes) {
+                // Exclude the value of predefined types, E.g. "bool: 1"
+                allTypes.add(mt.trim());
+            }
+        }
+
+        // We've collected all the message from all the message present in the Message list. Now print out the unique
+        // messages
+        printUniqueTypes(allTypes);
+    }
+
 	HashMap<String, HashMap<String, String>> enums = parseTypedef(); //the hashmap of enums with their corresponding byte sequence. See overview on the drive for details.
 
 	/* Finally, we use the hashmap created by determineBits() to determine what state the bytesequence
