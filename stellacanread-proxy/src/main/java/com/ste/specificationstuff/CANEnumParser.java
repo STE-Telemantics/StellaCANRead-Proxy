@@ -12,6 +12,7 @@ import java.util.List;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Collections;
 
 
 //CONSULT DRIVE FOR EASIER OVERVIEW OF FUNCTIONS - https://drive.google.com/drive/u/0/folders/1vgE6a2_4SK2RJL6YsllVkD5Wmiu9INAC 
@@ -200,12 +201,6 @@ public class CANEnumParser {
 		return timestamp;
 	}
 
-	// We need to deduce what data types (enum, bool, bool: 1, int etc.) reside within a signal. This information is found in the typedefs.csv file by searching on ID.
-	//Calculates one of the main parts of function parseOverview()
-	public String deduceDataTypes(int ID) {
-		return "temp";
-	}
-
     /**
      * Use the ID of a message to figure out the data types and their respective field names.
      *
@@ -218,7 +213,7 @@ public class CANEnumParser {
      * @return A List of Lists with Strings. The first list is a singleton list containing just the signal name. The second
      * list is the list of data types. The third list is the list of field names.
      */
-    public List<List<String>> parseOverview(int id) {
+    public static List<List<String>> parseOverview(int id) {
 
         // First instantiate a CANParser object in order to parse messages.csv
         CANParser cp = new CANParser();
@@ -255,8 +250,8 @@ public class CANEnumParser {
         listOfFieldNames.add("timestamp");
 
         for(int i = 0; i < messageDataTypes.length; i++) {
-            listOfDataTypes.add(messageDataTypes[i]);
-            listOfFieldNames.add(messageFieldNames[i]);
+            listOfDataTypes.add(messageDataTypes[i].trim());
+            listOfFieldNames.add(messageFieldNames[i].trim());
         }
 
         // Now we have all the data into either List of Strings or just a String. Aggregate this data in a List.
@@ -287,13 +282,11 @@ public class CANEnumParser {
 	bool, bool:1, uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, float, 
 	and OTHER (where OTHER is always an enum).
 	*/
-	public List<String> determineBits(List<String> l1, List<String> l2, String dataBytes, int endianness) {
+	public static List<String> determineBits(List<String> l1, List<String> l2, String dataBytes, int endianness) {
 		
 		List<String> result = new ArrayList<String>();
 
-		printUniqueTypes(l1);
-
-		for (int i = 0; i < l1.size() + 1; i++) {
+		for (int i = 0; i < l1.size(); i++) {
 			String dataType = l1.get(i);
 			dataType.replaceAll(" ", ""); //make "bool: 1" and "bool:1" equivalent
 			dataType.replaceAll("u", ""); //make "uints" equivalent to "ints"
@@ -597,9 +590,6 @@ public class CANEnumParser {
 	}
 
 	public static void main(String[] args) {
-		String testmsg = "(1600453413.400000) canx 2ee#6314d576e8e47776";
-		System.out.println(parseTimestamp(testmsg));
-		//printUniqueTypes();
 	}
 
 }
