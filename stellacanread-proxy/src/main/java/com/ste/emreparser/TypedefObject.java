@@ -4,16 +4,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class stores a single typedef that was parsed from a 
- * "CAN_typedef_2019_17-format.csv" file 
- * 
- * A single typedef line consists of three values: 
- * 
+ * This class stores a single typedef that was parsed from a
+ * "CAN_typedef_2019_17-format.csv" file
+ *
+ * A single typedef line consists of three values:
+ *
  * 1. A name
  * 2. A code
  * 3. A description
- * 
- * These values are stored in this object, together with the individiual states each typedef can take. 
+ *
+ * These values are stored in this object, together with the individiual states each typedef can take.
  */
 public class TypedefObject {
 
@@ -24,7 +24,7 @@ public class TypedefObject {
 
     // We also do some extra parsing to extract more information from the code variable
     private String codeType;
-    private String[] codeStates; 
+    private String[] codeStates;
 
     // Use the constructor to set up a basic instance of a Parsedtypedef object
     public TypedefObject(String name, String code, String description) {
@@ -32,11 +32,11 @@ public class TypedefObject {
         this.name = name;
         this.code = code;
         this.description = description;
-        
+
         // Do some additional parsing for the code variable
         parseCode();
     }
-    
+
     public void prettyPrint() {
         System.out.println("-------------------------------------------------------");
         System.out.println("| Pretty printing all values for " + this.name.toUpperCase());
@@ -53,13 +53,11 @@ public class TypedefObject {
     }
 
     private void parseCode() {
-        // Check for the type 
+        // Check for the type
         if (this.code.contains("uint8_t")) {
             this.codeType = "uint8_t";
-            
-        // TODO: find out if different types exist for the CAN spec
-        } else if (this.code.contains("??")) { 
-
+        }  else {
+            throw new IllegalArgumentException("Type not recognized");
         }
 
         // Extract the states from the code using a regular expression, which have the format "{state1, state2, state3, ...}"
@@ -67,7 +65,7 @@ public class TypedefObject {
         Pattern r = Pattern.compile(pattern);
 
         Matcher m = r.matcher(this.code);
-        
+
         if (m.find())
             this.codeStates = m.group(1).split(",");
 
@@ -75,14 +73,13 @@ public class TypedefObject {
         for (int i = 0; i < codeStates.length; i++) {
             this.codeStates[i] = this.codeStates[i].trim();
         }
-            //TODO: exception handling when format isn't correct
-    }   
+    }
 
     // Some basic getters to retrieve instance variables
     public String[] getCodeStates() {
         return this.codeStates;
     }
-    
+
     public String getCodeType() {
         return this.codeType;
     }
@@ -99,5 +96,5 @@ public class TypedefObject {
         return this.description;
     }
 
-    //TODO: maybe also implement setters for name, code and description 
+    //TODO: maybe also implement setters for name, code and description
 }

@@ -14,15 +14,15 @@ import java.util.Date;
 import java.util.HashSet;
 
 
-//CONSULT DRIVE FOR EASIER OVERVIEW OF FUNCTIONS - https://drive.google.com/drive/u/0/folders/1vgE6a2_4SK2RJL6YsllVkD5Wmiu9INAC 
+//CONSULT DRIVE FOR EASIER OVERVIEW OF FUNCTIONS - https://drive.google.com/drive/u/0/folders/1vgE6a2_4SK2RJL6YsllVkD5Wmiu9INAC
 
 
-/*Note: Bytes should always be read from left to right. Enums are always represented using a single byte, whereas booleans are represented using a single bit. Integers can be 
-* represented with upto 32 bits. Furthermore, the bytes that represent enums are typically equal to 00, 01, 02, 03 etc in hexadecimal. If a variable has three states it can only 
+/*Note: Bytes should always be read from left to right. Enums are always represented using a single byte, whereas booleans are represented using a single bit. Integers can be
+* represented with upto 32 bits. Furthermore, the bytes that represent enums are typically equal to 00, 01, 02, 03 etc in hexadecimal. If a variable has three states it can only
 * be equal to 00, 01, and 02. Also, enums are allowed to have non-standard byte sequences. In this case STE defines a what the byte sequence of a specific state looks like in the
 * CAN_typedef_2019_17-format.csv file.
 *
-* Examples: 
+* Examples:
 * signal A has 1 boolean that is set to true. The 8 bytes look as follows: 00000001 00000000 00000000 00000000 00000000 00000000 00000000 00000000
 * signal B has 3 booleans in the following order (from top to bottom in CAN-X) true, false, true. 8 bytes: 00000101 00000000 00000000 00000000 00000000 00000000 00000000 00000000
 * signal C has 2 booleans and 1 enum in the following order true true enumState2. 8 bytes: 00000011 00000010 00000000 00000000 00000000 00000000 00000000 00000000
@@ -45,14 +45,14 @@ public class CANEnumParser {
 
     //The actual message we'll eventually need to parse
     static String testmsg = "(1600453413.322000) canx 12d#01c90100a819d400";
-        
+
     //Data part of 'testmsg' (01c90100a819d400) converted to binary: 0001 11001001 00000001 00000000 10101000 00011001 11010100 00000000
-        
-     //These are strings that we will eventually need to deduce using the .csv files and the id of string 'testmsg'. The data types correspond to the following variables: 
+
+     //These are strings that we will eventually need to deduce using the .csv files and the id of string 'testmsg'. The data types correspond to the following variables:
 	//mode, bmsAlive, ssbAlive, srvRegenAlive, esbAlive, inverter
      String msgdatatypes = "ACUMode, bool: 1, bool: 1, bool: 1, bool: 1, InverterType";
-        
-    //string msgdatatypes has ACUMode, booleans, and an InverterType. We will eventually need to deduce what these enums are 
+
+    //string msgdatatypes has ACUMode, booleans, and an InverterType. We will eventually need to deduce what these enums are
     //by using the file 'CAN_typedef_2019_17-format.csv' file.
      static String ACUdef = "enum ACUMode:uint8_t{ACUModeRDW,ACUModeWSC,DARE}";
      static String InvertDef = "enum InverterType:uint8_t{InverterTypeUnknown,Tritium,NLE}";
@@ -162,7 +162,7 @@ public class CANEnumParser {
 
 		//int data = Integer.parseInt(split0[1], 16);
 		//result = String.valueOf(data);
-		//result = Integer.toBinaryString(Integer.parseInt(split0[1], 16)); 
+		//result = Integer.toBinaryString(Integer.parseInt(split0[1], 16));
 		result = hexToBin(split0[1]);
 		result = String.format("%064d", new BigInteger(result));
 
@@ -177,15 +177,15 @@ public class CANEnumParser {
 		String[] split1 = split0[1].split(" ");  //split0[1] = " 12d#01c90100a819d400"
 		String[] split2 = split1[1].split("#");  //split1[1] = "12d#01c90100a819d400"
 		String idInHex = split2[0]; //take the 'left side' after splitting "12d#01c90100a819d400" on "#"
-		int ID = Integer.parseInt(idInHex,16); 
+		int ID = Integer.parseInt(idInHex,16);
 
 		return ID;
 	}
 
 	//Takes a CAN message "(1600453413.322000) canx 12d#01c90100a819d400" and returns the timestamp associated with it.
 	public static String parseTimestamp(String CANMessage) {
-		String[] split0 = CANMessage.split("\\)"); 
-		String[] split1 = split0[0].split("\\(");//split0[0] = "(1600453413.322000", split1[1] = "1600453413.322000" 
+		String[] split0 = CANMessage.split("\\)");
+		String[] split1 = split0[0].split("\\(");//split0[0] = "(1600453413.322000", split1[1] = "1600453413.322000"
 		String[] split2 = split1[1].split("\\.");
 
 		long time1 = Long.valueOf(split2[0]).longValue();
@@ -201,14 +201,14 @@ public class CANEnumParser {
 		return "temp";
 	}
 
-	
+
 
 	/*
 	 Using the ID of the message in combination with the CAN overview, we can figure out what data types are present in the current CAN message.
 	 E.g. in this case something along the lines of:
 	 (int timestamp, ACUMode mode, bool bmsAlive, bool ssbAlive, bool srvRegenAlive, bool esbAlive, InverterType inverter)
-	 
-	 Note that ideally we'd like to have a list that contains multiple different types in a specific order. 
+
+	 Note that ideally we'd like to have a list that contains multiple different types in a specific order.
 	 It therefore probably shouldn't return a List of Strings, but see it as a placeholder.
 	 */
 	public List<List<String>> parseOverview(int id, long timestamp, String CANOverview) {
@@ -218,9 +218,9 @@ public class CANEnumParser {
 	}
 
 	/*
-	We can determine which bits belong to which data as this has a structured order. 
+	We can determine which bits belong to which data as this has a structured order.
 	We will create a hashmap that links these as follows:
-	{(ACUMode mode, 00000001), (bool bmsAlive, 1), (bool ssbAlive, 0), 
+	{(ACUMode mode, 00000001), (bool bmsAlive, 1), (bool ssbAlive, 0),
 	(bool srvRegenAlive, 1), (bool esbAlive, 1), (InverterType inverter, 00000110)}
 
 	Note that we will probably save the timestamp and pass it along as a separate variable,
@@ -232,11 +232,11 @@ public class CANEnumParser {
 	endianness: if endianness is >= 1 the byte order is different. Each signal has a specific integer denoted to endianness, and this should thus be checked in messages.csv.
 
 	Lastly, all available data types are:
-	bool, bool:1, uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, float, 
+	bool, bool:1, uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, float,
 	and OTHER (where OTHER is always an enum).
 	*/
 	public List<String> determineBits(List<String> l1, List<String> l2, String dataBytes, int endianness) {
-		
+
 		List<String> result = new ArrayList<String>();
 
 		printUniqueTypes(l1);
@@ -256,7 +256,7 @@ public class CANEnumParser {
 					result.add(dataBytes.substring(0,8)); //add bits to list3 (see overview on drive for a description of list3)
 					dataBytes = dataBytes.substring(8); //remove the byte from the overall String of bytes.
 				break;
-				
+
 				case "bool:1": //1 bit
 				//We need to check whether there are multiple "bool:1"s in a row. If there are we need to look within the same byte to find the correct corresponding bit.
 					int count = 0;
@@ -292,13 +292,13 @@ public class CANEnumParser {
 					}
 
 				break;
-				
-				case "int8_t": 
+
+				case "int8_t":
 					result.add(dataBytes.substring(0,8));
 					dataBytes = dataBytes.substring(8);
 					break;
-				
-				case "int16_t": 
+
+				case "int16_t":
 					if(endianness > 0) {
 						result.add(dataBytes.substring(0,16));
 						dataBytes = dataBytes.substring(16);
@@ -310,9 +310,9 @@ public class CANEnumParser {
 						dataBytes = dataBytes.substring(16);
 					}
 					break;
-				
-				
-				case "int32_t": 
+
+
+				case "int32_t":
 					if(endianness > 0) {
 						result.add(dataBytes.substring(0,32));
 						dataBytes = dataBytes.substring(32);
@@ -324,9 +324,9 @@ public class CANEnumParser {
 						result.add(temp);
 					}
 					break;
-				
-				
-				case "int64_t": 
+
+
+				case "int64_t":
 					if(endianness > 0) {
 						result.add(dataBytes);//is the only variable in the data, so string dataBytes does not need to be trimmed
 					} else {
@@ -341,10 +341,10 @@ public class CANEnumParser {
 						result.add(temp);
 					}
 					break;
-					
 
-				
-				case "float": 
+
+
+				case "float":
 					if (endianness > 0) {
 					result.add(dataBytes.substring(0,32));
 					dataBytes = dataBytes.substring(32);
@@ -357,7 +357,7 @@ public class CANEnumParser {
 					}
 					break;
 
-				default: 
+				default:
 					result.add(dataBytes.substring(0,8));
 					dataBytes = dataBytes.substring(8);
 					break;
@@ -386,8 +386,8 @@ public class CANEnumParser {
 	HashMap<String, HashMap<String, String>> enums = parseTypedef(); //the hashmap of enums with their corresponding byte sequence. See overview on the drive for details.
 
 	/* Finally, we use the hashmap created by determineBits() to determine what state the bytesequence
-	on the left partains. The integers and booleans all have set bit/byte sequences (see top of this java file), 
-	so those can be translated directly. The result should look as follows: 
+	on the left partains. The integers and booleans all have set bit/byte sequences (see top of this java file),
+	so those can be translated directly. The result should look as follows:
 
 	{
    "timestamp": "(1600453413.322000)"
@@ -402,7 +402,7 @@ public class CANEnumParser {
 	}
 
 	This is a specific format that allows for easier sending, receiving and parsing.
-	
+
 	As for what the lists are, please refer to the overview on google drive.
 	*/
 	public List<String> determineConcreteData(List<String> l1, List<String> l2, List<String> l3) {
@@ -426,7 +426,7 @@ public class CANEnumParser {
 						result.add("true");
 					}
 					break;
-				
+
 				case "bool:1": //1 bit
 					if(bytes.equals("0")) {
 						result.add("false");
@@ -434,68 +434,68 @@ public class CANEnumParser {
 						result.add("true");
 					}
 					break;
-				
-				case "uint8_t": 
+
+				case "uint8_t":
 					result.add(Integer.toString(Integer.parseInt(bytes, 2)));
 					break;
-				
-				case "uint16_t": 
+
+				case "uint16_t":
 					result.add(Integer.toString(Integer.parseInt(bytes, 2)));
 					break;
-						
-				case "uint32_t": 
-					result.add(Integer.toString(Integer.parseInt(bytes, 2)));
-					break;	
-				
-				case "uint64_t": 
+
+				case "uint32_t":
 					result.add(Integer.toString(Integer.parseInt(bytes, 2)));
 					break;
-					
-				case "int8_t": 
+
+				case "uint64_t":
+					result.add(Integer.toString(Integer.parseInt(bytes, 2)));
+					break;
+
+				case "int8_t":
 					String int8Value = ""; //final value to be calculated. Needs to be done in two steps: 1) determine if the value is negative or positive 2) determine value
 
 					if(bytes.substring(0,1).equals("1")) { //if the first bit is a '1' the value is negative.
 						int8Value = "-";
 					}
-					
+
 					int8Value.concat(Integer.toString(Integer.parseInt(bytes.substring(1), 2)));
 					result.add(int8Value);
 					break;
-				
-				case "int16_t": 
-					String int16Value = ""; 
 
-					if(bytes.substring(0,1).equals("1")) { 
+				case "int16_t":
+					String int16Value = "";
+
+					if(bytes.substring(0,1).equals("1")) {
 						int16Value = "-";
 					}
-					
-					int16Value.concat(Integer.toString(Integer.parseInt(bytes.substring(1), 2))); 
+
+					int16Value.concat(Integer.toString(Integer.parseInt(bytes.substring(1), 2)));
 					result.add(int16Value);
 					break;
-						
-				case "int32_t": 
-					String int32Value = ""; 
 
-					if(bytes.substring(0,1).equals("1")) { 
+				case "int32_t":
+					String int32Value = "";
+
+					if(bytes.substring(0,1).equals("1")) {
 						int32Value = "-";
 					}
-					
-					int32Value.concat(Integer.toString(Integer.parseInt(bytes.substring(1), 2))); 
+
+					int32Value.concat(Integer.toString(Integer.parseInt(bytes.substring(1), 2)));
 					result.add(int32Value);
-					break;	
-				
-				case "int64_t": 
+					break;
+
+				case "int64_t":
 					String int64Value = "";
 
-					if(bytes.substring(0,1).equals("1")) { 
+					if(bytes.substring(0,1).equals("1")) {
 						int64Value = "-";
 					}
-					
+
 					int64Value.concat(Integer.toString(Integer.parseInt(bytes.substring(1), 2)));
 					result.add(int64Value);
 					break;
-				
-				case "float": 
+
+				case "float":
 					int intBits = Integer.parseInt(bytes, 2);
 					Float floatValue = Float.intBitsToFloat(intBits);
 					String floatStringValue = floatValue.toString();
