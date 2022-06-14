@@ -33,7 +33,7 @@ public class CANParser {
 
         try { 
             // THe default path where the format file resides. May be overridden if the filechooser is used
-            String filename = "src/CANParser/canparser/src/res/messages.csv";
+            String filename = "src/main/resources/messages.csv";
             
             // Read in the filename depending on whether we want to choose a file or just use the default one
             if (USE_FILEPICKER) {
@@ -120,7 +120,7 @@ public class CANParser {
         try { 
             // Instantiate a CSVReader object and use it to read the default typedefs file
             reader = new CSVReaderBuilder(
-                new FileReader("src/CANParser/canparser/src/res/typedefs.csv"))
+                new FileReader("src/main/resources/typedefs.csv"))
                 .withCSVParser(new CSVParserBuilder().withSeparator(',').build())
                 .build();
 

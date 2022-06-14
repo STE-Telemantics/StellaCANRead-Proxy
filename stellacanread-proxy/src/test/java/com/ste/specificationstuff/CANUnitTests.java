@@ -19,7 +19,7 @@ public class CANUnitTests {
 
 
     // Used to access methods implemented for CANEnumParser
-    //static private CANEnumParser testParser = new CANEnumParser();
+    static private CANEnumParser testParser = new CANEnumParser();
 
     // Sanity test
     @Test
