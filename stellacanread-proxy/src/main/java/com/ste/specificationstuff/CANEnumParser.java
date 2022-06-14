@@ -188,9 +188,12 @@ public class CANEnumParser {
 		String[] split1 = split0[0].split("\\(");//split0[0] = "(1600453413.322000", split1[1] = "1600453413.322000" 
 		String[] split2 = split1[1].split("\\.");
 
-		long time1 = Long.valueOf(split2[0]).longValue();
-		long time2 = Long.valueOf(split2[1]).longValue();
-		String timestamp = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new java.util.Date ((time1+time2)*1000));
+		String seconds = split1[1].replace(".", "");
+		long time1 = Long.valueOf(seconds).longValue();
+		System.out.println(time1);
+		//long time1 = Long.valueOf(split2[0]).longValue();
+		//long time2 = Long.valueOf(split2[1]).longValue();
+		String timestamp = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new java.util.Date (time1/1000));
 
 		return timestamp;
 	}
@@ -514,8 +517,8 @@ public class CANEnumParser {
 	}
 
 	public static void main(String[] args) {
-		String testmsg = "(1600453413.104000) canx 12d#01c90100a819d400";
-		//System.out.println(parseTimestamp(testmsg));
+		String testmsg = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+		System.out.println(parseTimestamp(testmsg));
 		//printUniqueTypes();
 	}
 

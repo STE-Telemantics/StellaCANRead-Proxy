@@ -50,24 +50,6 @@ public class CANUnitTests {
         assertEquals(expected, result);
     }
 
-    // Test to see if empty string is handled correctly
-    @Test
-    public void testHexStringToBinEmpty() {
-        String str = "";
-        String expected = "";
-
-        assertEquals(expected, CANEnumParser.hexToBin(str));
-    }
-
-    // Test to see if short hex string gets converted correctly
-    @Test
-    public void testHexStringToBinShort() {
-        String str = "625AC";
-        String expected = "01100010010110101100";
-
-        assertEquals(expected, CANEnumParser.hexToBin(str));
-    }
-
     // Test to see if long hex string get converted correctly
     @Test
     public void testHexStringToBinLong() {
@@ -78,47 +60,56 @@ public class CANUnitTests {
 		result = String.format("%064d", new BigInteger(result));
         assertEquals(expected, result);
     }
-/* 
-    // Test to see if an illegal argument provides the expected error message
-    @Test(expected = IllegalArgumentException.class)
-    public void testHexStringToBinIllegalArg() {
-        // Function name to be replaced with actual function name
-        testParser.convertHexadecimal(true); // should only accept strings, so this boolean should throw an error
+ 
+    @Test
+    public void testParseIDBasic0() {
+        String testmsg = "(1600453413.322000) canx 12d#01c90100a819d400";
+        String expected = "301";
+        assertEquals(String.valueOf(CANEnumParser.parseID(testmsg)), expected);
     }
 
     @Test
-    public void testParseIDBasic() {
-        String testmsg = "(1600453413.322000) canx 12d#01c90100a819d400";
-        String expected = "12";
-        assertEquals(testParser.parseID("(1600453413.322000) canx 12d#01c90100a819d400"), expected);
-    }
-
-    // Test to see if an illegal argument provides the expected error message
-    @Test(expected = IllegalArgumentException.class)
-    public void testParseIdIllegalArg() {
-        testParser.parseID(false); // should only accept strings, so this boolean should throw an error
+    public void testParseIDBasic1() {
+        String testmsg = "(1600453413.358000) canx 41c#0014d576b3de9876";
+        String expected = "1052";
+        assertEquals(String.valueOf(CANEnumParser.parseID(testmsg)), expected);
     }
 
     @Test
-    public void testParseDataBasic() {
+    public void testParseDataBasic0() {
         String testmsg = "(1600453413.322000) canx 12d#01c90100a819d400";
-        String expected = "01c90100a819d400";
-        assertEquals(testParser.parseData("(1600453413.322000) canx 12d#01c90100a819d400"), expected);
+        String expected = "0000000111001001000000010000000010101000000110011101010000000000";
+        assertEquals(CANEnumParser.parseDataString(testmsg), expected);
     }
 
-    // Test to see if an illegal argument provides the expected error message
-    @Test(expected = IllegalArgumentException.class)
-    public void testParseDataIllegalArg() {
-        testParser.parseData(false); // should only accept strings, so this boolean should throw an error
+    @Test
+    public void testParseDataBasic1() {
+        String testmsg = "(1600453413.382000) canx 06d#0241d576b3de9876";
+        String expected = "0000001001000001110101010111011010110011110111101001100001110110";
+        assertEquals(CANEnumParser.parseDataString(testmsg), expected);
+    }
+
+    @Test
+    public void testParseDataBasic2() {
+        String testmsg = "(1600453413.512000) canx 2f0#308edf7e01000000";
+        String expected = "0011000010001110110111110111111000000001000000000000000000000000";
+        assertEquals(CANEnumParser.parseDataString(testmsg), expected);
     }
     
     @Test
-    public void testParseTimestampBasic() {
-        String testmsg = "(1600453413.322000) canx 12d#01c90100a819d400";
-        String expected = "1600453413.322000";
-        assertEquals(testParser.parseTimestamp("(1600453413.322000) canx 12d#01c90100a819d400"), expected);
+    public void testParseTimestampBasic0() {
+        String testmsg = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+        String expected = "09/18/2020 20:23:33";
+        assertEquals(CANEnumParser.parseTimestamp(testmsg), expected);
     }
 
+    @Test
+    public void testParseTimestampBasic1() {
+        String testmsg = "(1600456666.905000) canx 527#060900022fe90000";
+        String expected = "09/18/2020 21:17:46";
+        assertEquals(CANEnumParser.parseTimestamp(testmsg), expected);
+    }
+/*
     // Test to see if an illegal argument provides the expected error message
     @Test(expected = IllegalArgumentException.class)
     public void testParseTimestampIllegalArg() {
