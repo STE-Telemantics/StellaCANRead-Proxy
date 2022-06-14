@@ -206,21 +206,68 @@ public class CANEnumParser {
 		return "temp";
 	}
 
-	
+    /**
+     * Use the ID of a message to figure out the data types and their respective field names.
+     *
+     * Store the data types and the names in separate lists, but at the same index. This way a field name at index 3
+     * will correspond to a data type at index 3.
+     * The 0th index in each list will always be "String" and "timestamp" for the data type list and field name
+     * The first list is a singleton list containing just the signal name.
+     *
+     * @param id the ID for which the parseOverview will be created
+     * @return A List of Lists with Strings. The first list is a singleton list containing just the signal name. The second
+     * list is the list of data types. The third list is the list of field names.
+     */
+    public List<List<String>> parseOverview(int id) {
 
-	/*
-	 Using the ID of the message in combination with the CAN overview, we can figure out what data types are present in the current CAN message.
-	 E.g. in this case something along the lines of:
-	 (int timestamp, ACUMode mode, bool bmsAlive, bool ssbAlive, bool srvRegenAlive, bool esbAlive, InverterType inverter)
-	 
-	 Note that ideally we'd like to have a list that contains multiple different types in a specific order. 
-	 It therefore probably shouldn't return a List of Strings, but see it as a placeholder.
-	 */
-	public List<List<String>> parseOverview(int id, long timestamp, String CANOverview) {
-		List<String> temp = List.of("temp");
-		List<List<String>> temp2 = List.of(temp);
-		return temp2;
-	}
+        // First instantiate a CANParser object in order to parse messages.csv
+        CANParser cp = new CANParser();
+
+        // Parse messages.csv and store all the messages in a list
+        List<MessageObject> messageList = cp.parseMessagesDefault();
+
+        // Store the message with the current ID in this variable
+        MessageObject message = null;
+
+        // TODO: error handling when a message is null
+        // Search the list of message for the message that has the correct ID
+        for (MessageObject mo : messageList) {
+            if(Integer.parseInt(mo.getId()) == id) {
+                // Found the message with the correct ID, store it in the variable and stop searching
+                message = mo;
+                break;
+            }
+        }
+
+        // Now that we have the relevant message, extract the necessary data such as the name and the data types
+        String messageName = message.getName();
+        String[] messageDataTypes = message.getDataTypes();
+        String[] messageFieldNames = message.getFieldNames();
+
+        // Instantiate the two lists that we'll be filling with relevant data for the overview
+        List<String> listOfDataTypes = new ArrayList<>();
+        List<String> listOfFieldNames = new ArrayList<>();
+
+        // Populate the lists with data. For index 0 we always want to have the timestamp in both lists.
+        // We make the assumption that messageDataTypes.length == messageFieldNames.length
+        // TODO: add tests to confirm this assumption
+        listOfDataTypes.add("String");
+        listOfFieldNames.add("timestamp");
+
+        for(int i = 0; i < messageDataTypes.length; i++) {
+            listOfDataTypes.add(messageDataTypes[i]);
+            listOfFieldNames.add(messageFieldNames[i]);
+        }
+
+        // Now we have all the data into either List of Strings or just a String. Aggregate this data in a List.
+        // The structure is as follows: [String messageName, List<String> dataTypes, List<String> fieldNames]
+        List<List<String>> completeList = new ArrayList<>();
+        completeList.add(Collections.singletonList(messageName));
+        completeList.add(listOfDataTypes);
+        completeList.add(listOfFieldNames);
+
+        return completeList;
+    }
 
 	/*
 	We can determine which bits belong to which data as this has a structured order. 
@@ -387,6 +434,37 @@ public class CANEnumParser {
 		}
 		System.out.println();
 	}
+
+    /**
+     * Print out all the unique datatypes that are present in the messages.csv file.
+     *
+     * Requested by Mathijs Moonen
+     */
+    public void printUniqueMessageTypes() {
+        // Set up a CANParser object and parse the messages.csv file
+        CANParser cp = new CANParser();
+        List<MessageObject> messageList = cp.parseMessagesDefault();
+
+        // Collect *all* the datatypes in an ArrayList. We'll pass this list to the printUniqueTypes function
+        List<String> allTypes = new ArrayList<>();
+
+        // Iterate over all the messages in the list and add their data types to an ArrayList
+        for (MessageObject mo : messageList) {
+
+            // Get the message types from this message object
+            String[] messageTypes = mo.getDataTypes();
+
+            // Add the message types for this message to the Arraylist
+            for (String mt : messageTypes) {
+                // Exclude the value of predefined types, E.g. "bool: 1"
+                allTypes.add(mt.trim());
+            }
+        }
+
+        // We've collected all the message from all the message present in the Message list. Now print out the unique
+        // messages
+        printUniqueTypes(allTypes);
+    }
 
 	HashMap<String, HashMap<String, String>> enums = parseTypedef(); //the hashmap of enums with their corresponding byte sequence. See overview on the drive for details.
 
