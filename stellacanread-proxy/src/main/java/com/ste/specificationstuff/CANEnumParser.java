@@ -10,7 +10,9 @@ import java.util.*;
 import com.ste.emreparser.*;
 
 import java.math.BigInteger;
-
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Collections;
 
 //CONSULT DRIVE FOR EASIER OVERVIEW OF FUNCTIONS - https://drive.google.com/drive/u/0/folders/1vgE6a2_4SK2RJL6YsllVkD5Wmiu9INAC
 
@@ -285,7 +287,7 @@ public class CANEnumParser {
 	bool, bool:1, uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, float,
 	and OTHER (where OTHER is always an enum).
 	*/
-	public List<String> determineBits(List<String> l1, List<String> l2, String dataBytes, int endianness) {
+	public static List<String> determineBits(List<String> l1, List<String> l2, String dataBytes, int endianness) {
 
 		List<String> result = new ArrayList<String>();
 
