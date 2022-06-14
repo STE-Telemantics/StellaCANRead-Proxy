@@ -182,19 +182,21 @@ public class CANEnumParser {
 		return ID;
 	}
 
-	//Takes a CAN message "(1600453413.322000) canx 12d#01c90100a819d400" and returns the timestamp associated with it.
-	public static String parseTimestamp(String CANMessage) {
-		String[] split0 = CANMessage.split("\\)"); 
-		String[] split1 = split0[0].split("\\(");//split0[0] = "(1600453413.322000", split1[1] = "1600453413.322000" 
-		String[] split2 = split1[1].split("\\.");
-
-		String seconds = split1[1].replace(".", "");
+	public static String convertToDate(String seconds) {
 		long time1 = Long.valueOf(seconds).longValue();
 		System.out.println(time1);
 		//long time1 = Long.valueOf(split2[0]).longValue();
 		//long time2 = Long.valueOf(split2[1]).longValue();
-		String timestamp = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new java.util.Date (time1/1000));
+		String result = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new java.util.Date (time1/1000));
+		return result;
+	}
+	//Takes a CAN message "(1600453413.322000) canx 12d#01c90100a819d400" and returns the timestamp associated with it.
+	public static String parseTimestamp(String CANMessage) {
+		String[] split0 = CANMessage.split("\\)"); 
+		String[] split1 = split0[0].split("\\(");//split0[0] = "(1600453413.322000", split1[1] = "1600453413.322000" 
+		String seconds = split1[1].replace(".", "");
 
+		String timestamp = convertToDate(seconds);
 		return timestamp;
 	}
 
