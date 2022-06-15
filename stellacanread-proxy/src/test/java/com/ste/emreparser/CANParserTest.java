@@ -145,6 +145,116 @@ public class CANParserTest {
         }
     }
 
+    /* Check some expected data units */
+    // Check expected data units for ID 30
+    @Test
+    public void parseMessagesDefaultUnits1() {
+        // Parse messages.csv
+        List<MessageObject> messageList = cp.parseMessagesDefault();
+
+        // The expected data units for ID 30
+        int id = 30;
+        String[] expectedUnits = new String[] {"V", "A"};
+
+        // Get the MessageObject with ID 30 and check the expected data units
+        for (MessageObject mo : messageList) {
+            if (Integer.parseInt(mo.getId()) == id) {
+                assertArrayEquals(expectedUnits, mo.getUnits());
+            }
+        }
+    }
+
+    // Check expected data units for ID 220
+    @Test
+    public void parseMessagesDefaultUnits2() {
+        // Parse messages.csv
+        List<MessageObject> messageList = cp.parseMessagesDefault();
+
+        // The expected data units for ID 220
+        int id = 220;
+        String[] expectedUnits = new String[] {"-", "-", "-"};
+
+        // Get the MessageObject with ID 220 and check the expected data units
+        for (MessageObject mo : messageList) {
+            if (Integer.parseInt(mo.getId()) == id) {
+                assertArrayEquals(expectedUnits, mo.getUnits());
+            }
+        }
+    }
+
+    // Check expected data units for ID 1222
+    @Test
+    public void parseMessagesDefaultUnits3() {
+        // Parse messages.csv
+        List<MessageObject> messageList = cp.parseMessagesDefault();
+
+        // The expected data units for ID 1222
+        int id = 1222;
+        String[] expectedUnits = new String[] {"state","%","Hz"};
+
+        // Get the MessageObject with ID 1222 and check the expected data units
+        for (MessageObject mo : messageList) {
+            if (Integer.parseInt(mo.getId()) == id) {
+                assertArrayEquals(expectedUnits, mo.getUnits());
+            }
+        }
+    }
+
+    /* Check some expected data types */
+    // Check expected data types for ID 71
+    @Test
+    public void parseMessagesDefaultTypes1() {
+        // Parse messages.csv
+        List<MessageObject> messageList = cp.parseMessagesDefault();
+
+        // The expected data types for ID 71
+        int id = 71;
+        String[] expectedTypes = new String[] {"int16_t", "int16_t", "int16_t", "bool"};
+
+        // Get the MessageObject with ID 71 and check the expected data units
+        for (MessageObject mo : messageList) {
+            if (Integer.parseInt(mo.getId()) == id) {
+                assertArrayEquals(expectedTypes, mo.getDataTypes());
+            }
+        }
+    }
+
+    // Check expected data types for ID 232
+    @Test
+    public void parseMessagesDefaultTypes2() {
+        // Parse messages.csv
+        List<MessageObject> messageList = cp.parseMessagesDefault();
+
+        // The expected data types for ID 232
+        int id = 232;
+        String[] expectedTypes = new String[] {"int64_t"};
+
+        // Get the MessageObject with ID 232 and check the expected data units
+        for (MessageObject mo : messageList) {
+            if (Integer.parseInt(mo.getId()) == id) {
+                assertArrayEquals(expectedTypes, mo.getDataTypes());
+            }
+        }
+    }
+
+    // Check expected data types for ID 700109
+    @Test
+    public void parseMessagesDefaultTypes3() {
+        // Parse messages.csv
+        List<MessageObject> messageList = cp.parseMessagesDefault();
+
+        // The expected data types for ID 700109
+        int id = 700109;
+        String[] expectedTypes = new String[] {"MW3200FaultFlags"};
+
+        // Get the MessageObject with ID 700109 and check the expected data units
+        for (MessageObject mo : messageList) {
+            if (Integer.parseInt(mo.getId()) == id) {
+                assertArrayEquals(expectedTypes, mo.getDataTypes());
+            }
+        }
+    }
+
     /**
      * Tests that check the parsedTypedefsDefault method and the TypedefObject class
      */
