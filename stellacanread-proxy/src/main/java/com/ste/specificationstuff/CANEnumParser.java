@@ -194,7 +194,7 @@ public class CANEnumParser {
 	public static String parseTimestamp(String CANMessage) {
 		String[] split0 = CANMessage.split("\\)");
 		String[] split1 = split0[0].split("\\(");//split0[0] = "(1600453413.322000", split1[1] = "1600453413.322000"
-		String seconds = split1[1].replace(".", "");
+    String seconds = split1[1].replace(".", "");
 
 		String timestamp = convertToDate(seconds);
 		return timestamp;
@@ -270,6 +270,7 @@ public class CANEnumParser {
     }
 
 	/*
+
 	We can determine which bits belong to which data as this has a structured order.
 	We will create a hashmap that links these as follows:
 	{(ACUMode mode, 00000001), (bool bmsAlive, 1), (bool ssbAlive, 0),
@@ -292,6 +293,7 @@ public class CANEnumParser {
 	of these data types were provided to us by the STE team. Should you experience issues with these 
 	data types I would suggest looking into their cases in this function below.
 	*/
+
 	public static List<String> determineBits(List<String> l1, List<String> l2, String dataBytes, int endianness) {
 		
 		List<String> result = new ArrayList<String>();
