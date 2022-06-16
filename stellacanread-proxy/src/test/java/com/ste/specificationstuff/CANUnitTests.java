@@ -186,49 +186,134 @@ public class CANUnitTests {
         List<List<String>> testLists = CANEnumParser.parseOverview(ID);
         String dataBytes = CANEnumParser.parseDataString(CANMessage);
         List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"1", "1");
-        //TO DO: calculate endianness instead
-        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, 1);
+
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
 
         assertEquals(expected, result);
     }
 
+    //4 bool:1's
     @Test
     public void testDetermineBits1() {
-        String CANMessage = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+        String CANMessage = "(1600453413.400000) canx 2f0#308edf7e01000000";
         int ID = CANEnumParser.parseID(CANMessage);
         List<List<String>> testLists = CANEnumParser.parseOverview(ID);
         String dataBytes = CANEnumParser.parseDataString(CANMessage);
-        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"1", "1");
-        //TO DO: calculate endianness instead
-        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, 1);
+        System.out.println(dataBytes);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"0", "0", "0", "0");
+
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
 
         assertEquals(expected, result);
     }
 
-    //TO DO
+
+    //10 bool:1's
     @Test
     public void testDetermineBits2() {
-        String CANMessage = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+        String CANMessage = "(1600453413.560000) canx 259#2e320000b3de9876";
         int ID = CANEnumParser.parseID(CANMessage);
         List<List<String>> testLists = CANEnumParser.parseOverview(ID);
         String dataBytes = CANEnumParser.parseDataString(CANMessage);
-        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"1", "1");
-        //TO DO: calculate endianness instead
-        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, 1);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"0", "1", "1", "1", "0", "1", "0", "0", "0", "1");
+
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+
+        assertEquals(expected, result);
+    }
+
+    //6 bool's 
+    @Test
+    public void testDetermineBits3() {
+        String CANMessage = "(1600453413.400000) canx 0ca#000000010101d400";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage); 
+        //dataBytes = "0000000000000000000000000000000100000001000000011101010000000000"
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000000", "00000000", "00000000", "00000001", "00000001", "00000001");
+
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
 
         assertEquals(expected, result);
     }
     
-    //TO DO
+    //uint32_t, bool, bool:1, bool:1
     @Test
     public void testDetermineBits4() {
-        String CANMessage = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+        String CANMessage = "(1600453413.400000) canx 0cb#0000008f01a40000";
         int ID = CANEnumParser.parseID(CANMessage);
         List<List<String>> testLists = CANEnumParser.parseOverview(ID);
         String dataBytes = CANEnumParser.parseDataString(CANMessage);
-        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"1", "1");
-        //TO DO: calculate endianness instead
-        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, 1);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000000000000000000000010001111", "00000001", "0", "0");
+
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+
+        assertEquals(expected, result);
+    }
+
+    //float, float
+    @Test
+    public void testDetermineBits5() {
+        String CANMessage = "(1600453413.400000) canx 0d9#00a00f4300000000";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000000101000000000111101000011", "00000000000000000000000000000000");
+
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+
+        assertEquals(expected, result);
+    }
+
+    //uint16_t,bool:1,bool:1,bool:1,bool:1,bool:1,bool:1, uint8_t: 2, uint8_t, uint16_t, uint8_t, uint8_t
+    @Test
+    public void testDetermineBits6() {
+        String CANMessage = "(1600453413.104000) canx 4a1#1000000000000000";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"0001000000000000", "0", "0", "0", "0","0","0","00","00000000", "0000000000000000", "00000000", "00000000");
+
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+
+        assertEquals(expected, result);
+    }
+    //TO DO
+    @Test
+    public void testDetermineBits7() {
+        String CANMessage = "(1600453413.400000) canx 0cb#0000008f01a40000";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000000000000000000000010001111", "00000001", "0", "0");
+
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+
+        assertEquals(expected, result);
+    }
+    //TO DO
+    @Test
+    public void testDetermineBits8() {
+        String CANMessage = "(1600453413.400000) canx 0cb#0000008f01a40000";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000000000000000000000010001111", "00000001", "0", "0");
+
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+
+        assertEquals(expected, result);
+    }
+    //TO DO
+    @Test
+    public void testDetermineBits9() {
+        String CANMessage = "(1600453413.400000) canx 0cb#0000008f01a40000";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000000000000000000000010001111", "00000001", "0", "0");
+
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
 
         assertEquals(expected, result);
     }

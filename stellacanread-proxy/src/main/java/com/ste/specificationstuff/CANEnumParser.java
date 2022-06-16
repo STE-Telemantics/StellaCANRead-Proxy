@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Collections;
 
+
 //CONSULT DRIVE FOR EASIER OVERVIEW OF FUNCTIONS - https://drive.google.com/drive/u/0/folders/1vgE6a2_4SK2RJL6YsllVkD5Wmiu9INAC
 
 
@@ -184,7 +185,6 @@ public class CANEnumParser {
 
 	public static String convertToDate(String seconds) {
 		long time1 = Long.valueOf(seconds).longValue();
-		System.out.println(time1);
 		//long time1 = Long.valueOf(split2[0]).longValue();
 		//long time2 = Long.valueOf(split2[1]).longValue();
 		String result = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new java.util.Date (time1/1000));
@@ -284,17 +284,24 @@ public class CANEnumParser {
 	endianness: if endianness is >= 1 the byte order is different. Each signal has a specific integer denoted to endianness, and this should thus be checked in messages.csv.
 
 	Lastly, all available data types are:
-	bool, bool:1, uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, float,
+	bool, bool:1, uint8_t, uint8_t:2, uint8_t:6, uint16_t, uint16_t:11, uint32_t, uint64_t, uint64_t:48, int8_t, int16_t, int32_t, int64_t, float,
 	and OTHER (where OTHER is always an enum).
+
+	small note for a potential STE member looking for bugs in the future:
+	We haven't been able to fully test how ints of type uint8_t:2 or uint64_t:48 work because no examples
+	of these data types were provided to us by the STE team. Should you experience issues with these 
+	data types I would suggest looking into their cases in this function below.
 	*/
 	public static List<String> determineBits(List<String> l1, List<String> l2, String dataBytes, int endianness) {
-
+		
 		List<String> result = new ArrayList<String>();
 
 		for (int i = 0; i < l1.size(); i++) {
 			String dataType = l1.get(i);
-			dataType.replaceAll(" ", ""); //make "bool: 1" and "bool:1" equivalent
-			dataType.replaceAll("u", ""); //make "uints" equivalent to "ints"
+			dataType = dataType.replaceAll("\\s+",""); //make "bool: 1" and "bool:1" equivalent
+			dataType = dataType.replace("u", ""); //make "uints" equivalent to "ints"
+			
+			System.out.println(dataType); //REMOVE AFTER
 
 			switch (dataType) {
 
@@ -310,21 +317,23 @@ public class CANEnumParser {
 				case "bool:1": //1 bit
 				//We need to check whether there are multiple "bool:1"s in a row. If there are we need to look within the same byte to find the correct corresponding bit.
 					int count = 0;
-					for (int j = i+1; j < l2.size(); j++) {
-						if (l1.get(j).equals("bool:1")) {
+					for (int j = i+1; j < l1.size(); j++) {
+						if (l1.get(j).replaceAll("\\s+", "").equals("bool:1")) {
 							count++;
 						} else {
-							break;
+							j = l1.size();
 						}
 					}
 
 					if (count == 0) { //No consecutive "bool:1"s, thus only the least significant bit of the left-most byte is relevant.
 						result.add(dataBytes.substring(7,8));
-						dataBytes = dataBytes.substring(8);
+							dataBytes = dataBytes.substring(8);
+
 					} else { //multiple consecutive "bool:1"s
 						int beginIndex = 7;
 						int endIndex = 8;
-						for (int k = 0; k < count; k++) {
+						for (int k = 0; k < count+1; k++) {
+							System.out.println("substring = " + dataBytes.substring(beginIndex, endIndex));
 							result.add(dataBytes.substring(beginIndex, endIndex));
 							beginIndex--;
 							endIndex--;
@@ -334,18 +343,42 @@ public class CANEnumParser {
 								dataBytes = dataBytes.substring(8);
 								beginIndex = 7;
 								endIndex = 8;
-							}
-							i--; //we've done i++ one too many times for consecutive booleans, as the for loop itself will also increment i at the end. We will thus decrement
-									//it once.
+							}	
 						}
+						i--; //we've done i++ one too many times for consecutive booleans, as the for loop itself will also increment i at the end. We will thus decrement
+									//it once.
 
+						//we have to add this if-statement, because ONLY when the next data type is of the form 'uint8_t: 2', we cannot move onto the next
+						//byte. Thus we have to check whether this is the case.
+						if(!(i == l1.size() - 1)) { //causes index error if we're at the end of the list without this if-statement
+							if ((((l1.get(i+1)).replaceAll("\\s+","")).equals("uint8_t:2") || ((l1.get(i+1)).replaceAll("\\s+","")).equals("uint8_t:6")
+								|| ((l1.get(i+1)).replaceAll("\\s+","")).equals("uint16_t:11") || ((l1.get(i+1)).replaceAll("\\s+","")).equals("uint64_t:48"))) {	
+								//say count == 11, thus we have 12 booleans in a row. of string 0011001100110011 we'd want to remove the 
+								//right-most 12 bits. In this case we remove the bits 001100110011 s.t. we keep bits 0011.
+								String split0 = dataBytes.substring(0,(8 - ((count+1)%8))); 
+								String split1 = dataBytes.substring(8);
+								dataBytes = split0.concat(split1);
+							} else{
+								dataBytes = dataBytes.substring(8);
+							}
+						} 
 					}
 
-				break;
+						break;
 
 				case "int8_t":
 					result.add(dataBytes.substring(0,8));
 					dataBytes = dataBytes.substring(8);
+					break;
+
+				case "int8_t:2":
+					result.add(dataBytes.substring(0,2));
+					dataBytes = dataBytes.substring(2);
+					break;
+
+				case "int8_t:6":
+					result.add(dataBytes.substring(0,6));
+					dataBytes = dataBytes.substring(6);
 					break;
 
 				case "int16_t":
@@ -361,6 +394,16 @@ public class CANEnumParser {
 					}
 					break;
 
+				case "int16_t:11":
+					if(endianness > 0) {
+						result.add(dataBytes.substring(0,11));
+					} else {
+						String temp = dataBytes.substring(3,11);
+						temp.concat(dataBytes.substring(0,3));
+						result.add(temp);
+					}
+					dataBytes = dataBytes.substring(11);
+					break;
 
 				case "int32_t":
 					if(endianness > 0) {
@@ -392,7 +435,19 @@ public class CANEnumParser {
 					}
 					break;
 
-
+				case "int64_t:48":
+					if (endianness > 0) {
+						result.add(dataBytes.substring(0,48));
+					} else {
+						String temp = dataBytes.substring(40,48);
+						temp.concat(dataBytes.substring(32,40));
+						temp.concat(dataBytes.substring(24,32));
+						temp.concat(dataBytes.substring(16,24));
+						temp.concat(dataBytes.substring(8,16));
+						result.add(temp);
+					}
+					dataBytes = dataBytes.substring(48);
+					break;
 
 				case "float":
 					if (endianness > 0) {
@@ -595,9 +650,6 @@ public class CANEnumParser {
 	}
 
 	public static void main(String[] args) {
-		String testmsg = "(1600453413.400000) canx 2ee#6314d576e8e47776";
-		System.out.println(parseTimestamp(testmsg));
-
 	}
 
 }
