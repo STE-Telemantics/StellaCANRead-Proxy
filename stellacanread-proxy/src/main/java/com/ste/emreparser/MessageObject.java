@@ -1,25 +1,25 @@
 package com.ste.emreparser;
 
 /**
- * This class stores a single message that was parsed from 
+ * This class stores a single message that was parsed from
  * a "CAN_overview_2019_17-format.csv" file
- * 
- * A single message consists of 16 different fields, which are the following: 
- * id - name - DataNames - DataTypes - DataUnits - Standard Values - Log - PutToCan1 - PutToCan2 - 
+ *
+ * A single message consists of 16 different fields, which are the following:
+ * id - name - DataNames - DataTypes - DataUnits - Standard Values - Log - PutToCan1 - PutToCan2 -
  * Description - Sender - Receiver - ToStrat - ToVis - NotToDB - Convert Endiannes
- * 
- * These individual fields can be requested by calling the corresponding getter method. 
- * 
- * No additional processing is done on these fields. 
+ *
+ * These individual fields can be requested by calling the corresponding getter method.
+ *
+ * No additional processing is done on these fields.
  */
 
 //TODO: Convert this class to make use of the Builder design pattern
 public class MessageObject {
 
     // Declare all fields as String variables
-    private String id; 
-    private String name; 
-    private String[] fieldNames; 
+    private String id;
+    private String name;
+    private String[] fieldNames;
     private String[] dataTypes;
     private String[] units;
     private String[] defaultValues;
@@ -37,12 +37,12 @@ public class MessageObject {
                          String description, String senders, String receivers, String sendInterval, String convertEndianess,
                          String type, String properties, String sendFrequency) {
         this.id = id;
-        this.name = name; 
+        this.name = name;
         this.fieldNames = fieldNames.split(",");
         this.dataTypes = dataTypes.split(",");
         this.units = units.split(",");
         this.defaultValues = defaultValues.split(",");
-        this.description = description; 
+        this.description = description;
         this.senders = senders.split(",");
         this.receivers = receivers.split(",");
         this.sendInterval = sendInterval;
@@ -50,8 +50,32 @@ public class MessageObject {
         this.type = type;
         this.properties = properties;
         this.sendFrequency = sendFrequency;
+
+        // Remove all the whitespaces from the arrays that exist for this object
+        removeWhitespaces();
     }
 
+    // Remove all whitespaces from arrays that exist for this object
+    private void removeWhitespaces() {
+        for (int i = 0; i < this.fieldNames.length; i++) {
+            this.fieldNames[i] = this.fieldNames[i].trim();
+        }
+        for (int i = 0; i < this.dataTypes.length; i++) {
+            this.dataTypes[i] = this.dataTypes[i].trim();
+        }
+        for (int i = 0; i < this.units.length; i++) {
+            this.units[i] = this.units[i].trim();
+        }
+        for (int i = 0; i < this.defaultValues.length; i++) {
+            this.defaultValues[i] = this.defaultValues[i].trim();
+        }
+        for (int i = 0; i < this.senders.length; i++) {
+            this.senders[i] = this.senders[i].trim();
+        }
+        for (int i = 0; i < this.receivers.length; i++) {
+            this.receivers[i] = this.receivers[i].trim();
+        }
+    }
 
     public void prettyPrint() {
         System.out.println("-------------------------------------------------------");
