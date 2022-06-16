@@ -50,24 +50,6 @@ public class CANUnitTests {
         assertEquals(expected, result);
     }
 
-    // Test to see if empty string is handled correctly
-    @Test
-    public void testHexStringToBinEmpty() {
-        String str = "";
-        String expected = "";
-
-        assertEquals(expected, CANEnumParser.hexToBin(str));
-    }
-
-    // Test to see if short hex string gets converted correctly
-    @Test
-    public void testHexStringToBinShort() {
-        String str = "625AC";
-        String expected = "01100010010110101100";
-
-        assertEquals(expected, CANEnumParser.hexToBin(str));
-    }
-
     // Test to see if long hex string get converted correctly
     @Test
     public void testHexStringToBinLong() {
@@ -78,103 +60,179 @@ public class CANUnitTests {
 		result = String.format("%064d", new BigInteger(result));
         assertEquals(expected, result);
     }
-/* 
-    // Test to see if an illegal argument provides the expected error message
-    @Test(expected = IllegalArgumentException.class)
-    public void testHexStringToBinIllegalArg() {
-        // Function name to be replaced with actual function name
-        testParser.convertHexadecimal(true); // should only accept strings, so this boolean should throw an error
+ 
+    @Test
+    public void testParseIDBasic0() {
+        String testmsg = "(1600453413.322000) canx 12d#01c90100a819d400";
+        String expected = "301";
+        assertEquals(String.valueOf(CANEnumParser.parseID(testmsg)), expected);
     }
 
     @Test
-    public void testParseIDBasic() {
-        String testmsg = "(1600453413.322000) canx 12d#01c90100a819d400";
-        String expected = "12";
-        assertEquals(testParser.parseID("(1600453413.322000) canx 12d#01c90100a819d400"), expected);
-    }
-
-    // Test to see if an illegal argument provides the expected error message
-    @Test(expected = IllegalArgumentException.class)
-    public void testParseIdIllegalArg() {
-        testParser.parseID(false); // should only accept strings, so this boolean should throw an error
+    public void testParseIDBasic1() {
+        String testmsg = "(1600453413.358000) canx 41c#0014d576b3de9876";
+        String expected = "1052";
+        assertEquals(String.valueOf(CANEnumParser.parseID(testmsg)), expected);
     }
 
     @Test
-    public void testParseDataBasic() {
+    public void testParseDataBasic0() {
         String testmsg = "(1600453413.322000) canx 12d#01c90100a819d400";
-        String expected = "01c90100a819d400";
-        assertEquals(testParser.parseData("(1600453413.322000) canx 12d#01c90100a819d400"), expected);
+        String expected = "0000000111001001000000010000000010101000000110011101010000000000";
+        assertEquals(CANEnumParser.parseDataString(testmsg), expected);
     }
 
-    // Test to see if an illegal argument provides the expected error message
-    @Test(expected = IllegalArgumentException.class)
-    public void testParseDataIllegalArg() {
-        testParser.parseData(false); // should only accept strings, so this boolean should throw an error
+    @Test
+    public void testParseDataBasic1() {
+        String testmsg = "(1600453413.382000) canx 06d#0241d576b3de9876";
+        String expected = "0000001001000001110101010111011010110011110111101001100001110110";
+        assertEquals(CANEnumParser.parseDataString(testmsg), expected);
+    }
+
+    @Test
+    public void testParseDataBasic2() {
+        String testmsg = "(1600453413.512000) canx 2f0#308edf7e01000000";
+        String expected = "0011000010001110110111110111111000000001000000000000000000000000";
+        assertEquals(CANEnumParser.parseDataString(testmsg), expected);
     }
     
     @Test
-    public void testParseTimestampBasic() {
-        String testmsg = "(1600453413.322000) canx 12d#01c90100a819d400";
-        String expected = "1600453413.322000";
-        assertEquals(testParser.parseTimestamp("(1600453413.322000) canx 12d#01c90100a819d400"), expected);
+    public void testParseTimestampBasic0() {
+        String testmsg = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+        String expected = "09/18/2020 20:23:33";
+        assertEquals(CANEnumParser.parseTimestamp(testmsg), expected);
     }
 
-    // Test to see if an illegal argument provides the expected error message
-    @Test(expected = IllegalArgumentException.class)
-    public void testParseTimestampIllegalArg() {
-        testParser.parseTimestamp(false); // should only accept strings, so this boolean should throw an error
+    @Test
+    public void testParseTimestampBasic1() {
+        String testmsg = "(1600456666.905000) canx 527#060900022fe90000";
+        String expected = "09/18/2020 21:17:46";
+        assertEquals(CANEnumParser.parseTimestamp(testmsg), expected);
     }
 
+    //tests if the signal name is computed correctly
     @Test
     public void testParseOverviewSignalName() {
-        // This assumes ParseOverview() has output like [signal name, datatype list, data names list], in this order
-        String id = "12";
-        String timestamp = "1600453413.322000";
-        String result_signal_name = testParser.parseOverview(id, timestamp)[0];
-        String expected = "ACU_KeepAlive";
-        assertEquals(expected, result_signal_name);
+        List<List<String>> testLists = CANEnumParser.parseOverview(301);		
+		List<String> name = testLists.get(0);
+        String expected = "ACU_Keepalive";
+
+        assertEquals(expected, name.get(0));
+    }
+
+    //tests if the list of data types is generated correctly.
+    @Test
+    public void testParseOverviewTypes0() {
+        List<List<String>> testLists = CANEnumParser.parseOverview(301);		
+		List<String> dataTypes = testLists.get(2);
+        List<String> expected = Arrays.asList("timestamp","mode","bmsAlive","ssbAlive","srvRegenAlive","esbAlive","inverter");
+
+        assertEquals(expected, dataTypes);
+    }
+    
+    @Test
+    public void testParseOverviewTypes1() {
+        List<List<String>> testLists = CANEnumParser.parseOverview(518);		
+		List<String> dataTypes = testLists.get(2);
+        List<String> expected = Arrays.asList("timestamp","ch1Voltage", "ch2Voltage", "ch3Voltage");
+
+        assertEquals(expected, dataTypes);
+    }
+
+        //1291,Dbg_ChC_Inputs1,"p0_23_voltage, p0_24_dc","float, float"
+    @Test
+    public void testParseOverviewTypes2() {
+        List<List<String>> testLists = CANEnumParser.parseOverview(1291);		
+		List<String> dataTypes = testLists.get(2);
+        List<String> expected = Arrays.asList("timestamp","p0_23_voltage", "p0_24_dc");
+
+        assertEquals(expected, dataTypes);
+    }
+
+    //tests if the list of field names is generated correctly.
+    @Test
+    public void testParseOverviewNames0() {
+        List<List<String>> testLists = CANEnumParser.parseOverview(301);		
+		List<String> fieldNames = testLists.get(1);
+        List<String> expected = Arrays.asList("String", "ACUMode", "bool: 1", "bool: 1", "bool: 1", "bool: 1", "InverterType");
+
+        assertEquals(expected, fieldNames);
+    }    
+
+    @Test
+    public void testParseOverviewNames1() {
+        List<List<String>> testLists = CANEnumParser.parseOverview(518);		
+		List<String> fieldNames = testLists.get(1);
+        List<String> expected = Arrays.asList("String", "uint16_t", "uint16_t", "uint16_t");
+
+        assertEquals(expected, fieldNames);
+    }  
+
+    @Test
+    public void testParseOverviewNames2() {
+        List<List<String>> testLists = CANEnumParser.parseOverview(1291);		
+		List<String> fieldNames = testLists.get(1);
+        List<String> expected = Arrays.asList("String", "float", "float");
+
+        assertEquals(expected, fieldNames);
+    }    
+
+    //tests if the bits are computed correctly for CANMessage:
+    //(1600453413.400000) canx 2ee#6314d576e8e47776
+    @Test
+    public void testDetermineBits0() {
+        String CANMessage = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"1", "1");
+        //TO DO: calculate endianness instead
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, 1);
+
+        assertEquals(expected, result);
     }
 
     @Test
-    public void testParseOverviewDatatypeList() {
-        // This assumes ParseOverview() has output like [signal name, datatype list, data names list], in this order
-        String id = "12";
-        String timestamp = "1600453413.322000";
-        List<String> result_datatype_list = testParser.parseOverview(id, timestamp)[1];
-        List<String> expected = Arrays.asList("int",
-                                                    "ACUMode",
-                                                    "bool",
-                                                    "bool",
-                                                    "bool",
-                                                    "bool",
-                                                    "InverterType");
-        assertEquals(expected, result_datatype_list);
+    public void testDetermineBits1() {
+        String CANMessage = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"1", "1");
+        //TO DO: calculate endianness instead
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, 1);
+
+        assertEquals(expected, result);
     }
 
+    //TO DO
     @Test
-    public void testParseOverviewDataNamesList() {
-        // This assumes ParseOverview() has output like [signal name, datatype list, data names list], in this order
-        String id = "12";
-        String timestamp = "1600453413.322000";
-        List<String> result_dataname_list = testParser.parseOverview(id, timestamp)[2];
-        List<String> expected = Arrays.asList("timestamp",
-                                                    "mode",
-                                                    "bmsAlive",
-                                                    "ssbAlive",
-                                                    "srvRegenAlive",
-                                                    "esbAlive",
-                                                    "inverter");
-        assertEquals(expected, result_dataname_list);
-    }
+    public void testDetermineBits2() {
+        String CANMessage = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"1", "1");
+        //TO DO: calculate endianness instead
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, 1);
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testParseOverviewIllegalArg() {
-        // This assumes ParseOverview() has output like [signal name, datatype list, data names list], in this order
-        int id = 2817;
-        boolean timestamp = false;
-        testParser.parseOverview(id, timestamp);
+        assertEquals(expected, result);
     }
+    
+    //TO DO
+    @Test
+    public void testDetermineBits4() {
+        String CANMessage = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"1", "1");
+        //TO DO: calculate endianness instead
+        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, 1);
 
+        assertEquals(expected, result);
+    }
+    /*
     @Test
     public void testDetermineBitsSignalName() {
         String id = "12";

@@ -5,14 +5,14 @@
 package com.ste.specificationstuff;
 
 
-import java.util.ArrayList;
+import java.util.*;
+
 import com.ste.emreparser.*;
-import java.util.HashMap;
-import java.util.List;
+
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashSet;
-
+import java.util.Collections;
 
 //CONSULT DRIVE FOR EASIER OVERVIEW OF FUNCTIONS - https://drive.google.com/drive/u/0/folders/1vgE6a2_4SK2RJL6YsllVkD5Wmiu9INAC
 
@@ -182,42 +182,95 @@ public class CANEnumParser {
 		return ID;
 	}
 
+	public static String convertToDate(String seconds) {
+		long time1 = Long.valueOf(seconds).longValue();
+		System.out.println(time1);
+		//long time1 = Long.valueOf(split2[0]).longValue();
+		//long time2 = Long.valueOf(split2[1]).longValue();
+		String result = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new java.util.Date (time1/1000));
+		return result;
+	}
 	//Takes a CAN message "(1600453413.322000) canx 12d#01c90100a819d400" and returns the timestamp associated with it.
 	public static String parseTimestamp(String CANMessage) {
 		String[] split0 = CANMessage.split("\\)");
 		String[] split1 = split0[0].split("\\(");//split0[0] = "(1600453413.322000", split1[1] = "1600453413.322000"
-		String[] split2 = split1[1].split("\\.");
+    String seconds = split1[1].replace(".", "");
 
-		long time1 = Long.valueOf(split2[0]).longValue();
-		long time2 = Long.valueOf(split2[1]).longValue();
-		String timestamp = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new java.util.Date ((time1+time2)*1000));
-
+		String timestamp = convertToDate(seconds);
 		return timestamp;
 	}
 
-	// We need to deduce what data types (enum, bool, bool: 1, int etc.) reside within a signal. This information is found in the typedefs.csv file by searching on ID.
-	//Calculates one of the main parts of function parseOverview()
-	public String deduceDataTypes(int ID) {
-		return "temp";
-	}
+    /**
+     * Use the ID of a message to figure out the data types and their respective field names.
+     *
+     * Store the data types and the names in separate lists, but at the same index. This way a field name at index 3
+     * will correspond to a data type at index 3.
+     * The 0th index in each list will always be "String" and "timestamp" for the data type list and field name
+     * The first list is a singleton list containing just the signal name.
+     *
+     * @param id the ID for which the parseOverview will be created
+     * @return A List of Lists with Strings.
+     *      - The first list is a singleton list containing just the signal name.
+     *      - The second list is the list of data types
+     *      -.The third list is the list of field names.
+     *      - The fourth list is a singleton list containing just the endianness value.
+     */
+    public static List<List<String>> parseOverview(int id) {
 
+        // First instantiate a CANParser object in order to parse messages.csv
+        CANParser cp = new CANParser();
 
+        // Parse messages.csv and store all the messages in a list
+        List<MessageObject> messageList = cp.parseMessagesDefault();
+
+        // Store the message with the current ID in this variable
+        MessageObject message = null;
+
+        // TODO: error handling when a message is null
+        // Search the list of message for the message that has the correct ID
+        for (MessageObject mo : messageList) {
+            if(Integer.parseInt(mo.getId()) == id) {
+                // Found the message with the correct ID, store it in the variable and stop searching
+                message = mo;
+                break;
+            }
+        }
+
+        // Now that we have the relevant message, extract the necessary data such as the name and the data types
+        String messageName = message.getName();
+        String[] messageDataTypes = message.getDataTypes();
+        String[] messageFieldNames = message.getFieldNames();
+
+        // Instantiate the two lists that we'll be filling with relevant data for the overview
+        List<String> listOfDataTypes = new ArrayList<>();
+        List<String> listOfFieldNames = new ArrayList<>();
+
+        // Populate the lists with data. For index 0 we always want to have the timestamp in both lists.
+        // We make the assumption that messageDataTypes.length == messageFieldNames.length
+        // TODO: add tests to confirm this assumption
+        listOfDataTypes.add("String");
+        listOfFieldNames.add("timestamp");
+
+        for(int i = 0; i < messageDataTypes.length; i++) {
+            listOfDataTypes.add(messageDataTypes[i].trim());
+            listOfFieldNames.add(messageFieldNames[i].trim());
+        }
+
+        // Now we have all the data into either List of Strings or just a String. Aggregate this data in a List.
+        // The structure is as follows: [List<String> messageName, List<String> dataTypes, List<String> fieldNames, List<String> endianness]
+        List<List<String>> completeList = new ArrayList<>();
+        completeList.add(Collections.singletonList(messageName));
+        completeList.add(listOfDataTypes);
+        completeList.add(listOfFieldNames);
+
+        // Add the Endianness as the fourth, singleton list
+        completeList.add(Collections.singletonList(message.getConvertEndianness()));
+
+        return completeList;
+    }
 
 	/*
-	 Using the ID of the message in combination with the CAN overview, we can figure out what data types are present in the current CAN message.
-	 E.g. in this case something along the lines of:
-	 (int timestamp, ACUMode mode, bool bmsAlive, bool ssbAlive, bool srvRegenAlive, bool esbAlive, InverterType inverter)
 
-	 Note that ideally we'd like to have a list that contains multiple different types in a specific order.
-	 It therefore probably shouldn't return a List of Strings, but see it as a placeholder.
-	 */
-	public List<List<String>> parseOverview(int id, long timestamp, String CANOverview) {
-		List<String> temp = List.of("temp");
-		List<List<String>> temp2 = List.of(temp);
-		return temp2;
-	}
-
-	/*
 	We can determine which bits belong to which data as this has a structured order.
 	We will create a hashmap that links these as follows:
 	{(ACUMode mode, 00000001), (bool bmsAlive, 1), (bool ssbAlive, 0),
@@ -235,13 +288,12 @@ public class CANEnumParser {
 	bool, bool:1, uint8_t, uint16_t, uint32_t, uint64_t, int8_t, int16_t, int32_t, int64_t, float,
 	and OTHER (where OTHER is always an enum).
 	*/
-	public List<String> determineBits(List<String> l1, List<String> l2, String dataBytes, int endianness) {
+
+	public static List<String> determineBits(List<String> l1, List<String> l2, String dataBytes, int endianness) {
 
 		List<String> result = new ArrayList<String>();
 
-		printUniqueTypes(l1);
-
-		for (int i = 0; i < l1.size() + 1; i++) {
+		for (int i = 0; i < l1.size(); i++) {
 			String dataType = l1.get(i);
 			dataType.replaceAll(" ", ""); //make "bool: 1" and "bool:1" equivalent
 			dataType.replaceAll("u", ""); //make "uints" equivalent to "ints"
@@ -383,6 +435,37 @@ public class CANEnumParser {
 		System.out.println();
 	}
 
+    /**
+     * Print out all the unique datatypes that are present in the messages.csv file.
+     *
+     * Requested by Mathijs Moonen
+     */
+    public void printUniqueMessageTypes() {
+        // Set up a CANParser object and parse the messages.csv file
+        CANParser cp = new CANParser();
+        List<MessageObject> messageList = cp.parseMessagesDefault();
+
+        // Collect *all* the datatypes in an ArrayList. We'll pass this list to the printUniqueTypes function
+        List<String> allTypes = new ArrayList<>();
+
+        // Iterate over all the messages in the list and add their data types to an ArrayList
+        for (MessageObject mo : messageList) {
+
+            // Get the message types from this message object
+            String[] messageTypes = mo.getDataTypes();
+
+            // Add the message types for this message to the Arraylist
+            for (String mt : messageTypes) {
+                // Exclude the value of predefined types, E.g. "bool: 1"
+                allTypes.add(mt.trim());
+            }
+        }
+
+        // We've collected all the message from all the message present in the Message list. Now print out the unique
+        // messages
+        printUniqueTypes(allTypes);
+    }
+
 	HashMap<String, HashMap<String, String>> enums = parseTypedef(); //the hashmap of enums with their corresponding byte sequence. See overview on the drive for details.
 
 	/* Finally, we use the hashmap created by determineBits() to determine what state the bytesequence
@@ -514,9 +597,9 @@ public class CANEnumParser {
 	}
 
 	public static void main(String[] args) {
-		String testmsg = "(1600453413.104000) canx 12d#01c90100a819d400";
-		//System.out.println(parseTimestamp(testmsg));
-		//printUniqueTypes();
+		String testmsg = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+		System.out.println(parseTimestamp(testmsg));
+
 	}
 
 }
