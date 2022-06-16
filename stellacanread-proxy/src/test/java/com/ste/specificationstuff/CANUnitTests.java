@@ -478,6 +478,33 @@ public class CANUnitTests {
 
         assertEquals(expected, result);
     }
+
+    public static void fullRun(String CANMessage) {
+        int ID = CANEnumParser.parseID(CANMessage);
+        String timestamp = CANEnumParser.parseTimestamp(CANMessage);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        int endianness = Integer.parseInt(testLists.get(3).get(0));
+        String signalName = testLists.get(0).get(0);
+        List<String> dataTypes = testLists.get(1);
+        List<String> variableNames = testLists.get(2);
+        List<String> bytes = CANEnumParser.determineBits(dataTypes, variableNames, dataBytes, endianness);
+        List<String> values = CANEnumParser.determineConcreteData(dataTypes, variableNames, bytes, timestamp);
+
+        System.out.println("The CANMessage contains signal " + signalName + " and has the following values: ");
+        System.out.println();
+        for(int i = 0; i < dataTypes.size(); i++) {
+            System.out.println(variableNames.get(i) + " = " + values.get(i));
+        }
+    }
+
+
+    @Test
+    public void fullRuntest() {
+        String CANMessage = "(1600453413.560000) canx 25a#0014d576b3de9876";
+        fullRun(CANMessage);
+    }
+
     /*
     @Test
     public void testDetermineBitsSignalName() {

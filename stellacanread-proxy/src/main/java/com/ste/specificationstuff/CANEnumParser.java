@@ -303,8 +303,6 @@ public class CANEnumParser {
 			dataType = dataType.replaceAll("\\s+",""); //make "bool: 1" and "bool:1" equivalent
 			dataType = dataType.replace("u", ""); //make "uints" equivalent to "ints"
 			
-			System.out.println(dataType); //REMOVE AFTER
-
 			switch (dataType) {
 
 				case "String": //String is only used for timestamp, and the timestamp itself isn't contained within the 8 bytes. We can already translate this and it doesnt matter where we do it, so we simply do it here.
@@ -460,7 +458,6 @@ public class CANEnumParser {
 						temp = temp.concat(dataBytes.substring(16,24));
 						temp = temp.concat(dataBytes.substring(8,16));
 						temp = temp.concat(dataBytes.substring(0,8));
-						System.out.println(temp);
 						result.add(temp);
 					}
 					dataBytes = dataBytes.substring(32);
