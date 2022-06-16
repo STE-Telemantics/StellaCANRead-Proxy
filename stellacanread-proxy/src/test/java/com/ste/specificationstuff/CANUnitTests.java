@@ -1,11 +1,11 @@
 package com.ste.specificationstuff;
 //import specificationstuff;
-import com.ste.emreparser.*;
+// com.ste.emreparser.*;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.HashMap;
+//import java.util.HashMap;
 import java.util.List;
 import java.math.BigInteger;
 
@@ -19,7 +19,7 @@ public class CANUnitTests {
 
 
     // Used to access methods implemented for CANEnumParser
-    static private CANEnumParser testParser = new CANEnumParser();
+    //static private CANEnumParser testParser = new CANEnumParser();
 
     // Sanity test
     @Test
@@ -28,6 +28,8 @@ public class CANUnitTests {
         assertEquals("Junit is working fine", str);
     }
     
+    //hexToBin() testcases
+
     // Test to see if all hexadecimal characters get converted to correct equivalent binary number
     @Test
     public void testHexStringToBinAllCharacters() {
@@ -61,6 +63,8 @@ public class CANUnitTests {
         assertEquals(expected, result);
     }
  
+    //parseID() testcases
+
     @Test
     public void testParseIDBasic0() {
         String testmsg = "(1600453413.322000) canx 12d#01c90100a819d400";
@@ -74,6 +78,8 @@ public class CANUnitTests {
         String expected = "1052";
         assertEquals(String.valueOf(CANEnumParser.parseID(testmsg)), expected);
     }
+
+    //parseDataString() testcases
 
     @Test
     public void testParseDataBasic0() {
@@ -96,6 +102,8 @@ public class CANUnitTests {
         assertEquals(CANEnumParser.parseDataString(testmsg), expected);
     }
     
+    //parseTimestamp() testcases
+
     @Test
     public void testParseTimestampBasic0() {
         String testmsg = "(1600453413.400000) canx 2ee#6314d576e8e47776";
@@ -109,6 +117,8 @@ public class CANUnitTests {
         String expected = "09/18/2020 21:17:46";
         assertEquals(CANEnumParser.parseTimestamp(testmsg), expected);
     }
+
+    //parseOverview() testcases
 
     //tests if the signal name is computed correctly
     @Test
@@ -177,8 +187,9 @@ public class CANUnitTests {
         assertEquals(expected, fieldNames);
     }    
 
-    //tests if the bits are computed correctly for CANMessage:
-    //(1600453413.400000) canx 2ee#6314d576e8e47776
+    //determineBits() testcases
+
+    //bool:1, bool:1
     @Test
     public void testDetermineBits0() {
         String CANMessage = "(1600453413.400000) canx 2ee#6314d576e8e47776";
@@ -192,7 +203,7 @@ public class CANUnitTests {
         assertEquals(expected, result);
     }
 
-    //4 bool:1's
+    //bool:1, bool:1, bool:1, bool:1 
     @Test
     public void testDetermineBits1() {
         String CANMessage = "(1600453413.400000) canx 2f0#308edf7e01000000";
@@ -208,7 +219,7 @@ public class CANUnitTests {
     }
 
 
-    //10 bool:1's
+    //bool:1, bool:1, bool:1, bool:1, bool:1, bool:1, bool:1, bool:1, bool:1, bool:1 
     @Test
     public void testDetermineBits2() {
         String CANMessage = "(1600453413.560000) canx 259#2e320000b3de9876";
@@ -222,7 +233,7 @@ public class CANUnitTests {
         assertEquals(expected, result);
     }
 
-    //6 bool's 
+    //bool, bool, bool, bool, bool, bool 
     @Test
     public void testDetermineBits3() {
         String CANMessage = "(1600453413.400000) canx 0ca#000000010101d400";
@@ -258,7 +269,7 @@ public class CANUnitTests {
         int ID = CANEnumParser.parseID(CANMessage);
         List<List<String>> testLists = CANEnumParser.parseOverview(ID);
         String dataBytes = CANEnumParser.parseDataString(CANMessage);
-        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000000101000000000111101000011", "00000000000000000000000000000000");
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"01000011000011111010000000000000", "00000000000000000000000000000000");
 
         List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
 
@@ -304,6 +315,169 @@ public class CANUnitTests {
         assertEquals(expected, result);
     }
 
+    //determineConcreteData() testcases
+
+    //bool:1, bool:1
+    @Test
+    public void testDetermineConcreteData0() {
+        String CANMessage = "(1600453413.400000) canx 2ee#6314d576e8e47776";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> bytes = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+        String timestamp = CANEnumParser.parseTimestamp(CANMessage);
+        System.out.println(dataBytes);
+        
+        List<String> expected = Arrays.asList(timestamp, "true", "true");
+
+        List<String> result = CANEnumParser.determineConcreteData(testLists.get(1), testLists.get(2), bytes, timestamp);
+
+        assertEquals(expected, result);
+    }
+
+    //bool:1, bool:1, bool:1, bool:1 
+    @Test
+    public void testDetermineConcreteData1() {
+        String CANMessage = "(1600453413.400000) canx 2f0#308edf7e01000000";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> bytes = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+        String timestamp = CANEnumParser.parseTimestamp(CANMessage);
+        System.out.println(dataBytes);
+        
+        List<String> expected = Arrays.asList(timestamp,"false", "false", "false", "false");
+
+        List<String> result = CANEnumParser.determineConcreteData(testLists.get(1), testLists.get(2), bytes, timestamp);
+
+        assertEquals(expected, result);
+    }
+
+
+    //bool:1, bool:1, bool:1, bool:1, bool:1, bool:1, bool:1, bool:1, bool:1, bool:1 
+    @Test
+    public void testDetermineConcreteData2() {
+        String CANMessage = "(1600453413.560000) canx 259#2e320000b3de9876";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> bytes = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+        String timestamp = CANEnumParser.parseTimestamp(CANMessage);
+        System.out.println(dataBytes);
+        
+        List<String> expected = Arrays.asList(timestamp,"false", "true", "true", "true", "false", "true", "false", "false", "false", "true");
+
+        List<String> result = CANEnumParser.determineConcreteData(testLists.get(1), testLists.get(2), bytes, timestamp);
+
+        assertEquals(expected, result);
+    }
+
+    //bool, bool, bool, bool, bool, bool
+    @Test
+    public void testDetermineConcreteData3() {
+        String CANMessage = "(1600453413.400000) canx 0ca#000000010101d400";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> bytes = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+        String timestamp = CANEnumParser.parseTimestamp(CANMessage);
+        System.out.println(dataBytes);
+        
+        List<String> expected = Arrays.asList(timestamp,"false", "false", "false", "true", "true", "true");
+
+        List<String> result = CANEnumParser.determineConcreteData(testLists.get(1), testLists.get(2), bytes, timestamp);
+
+        assertEquals(expected, result);
+    }
+    
+    //uint32_t, bool, bool:1, bool:1
+    @Test
+    public void testDetermineConcreteData4() {
+        String CANMessage = "(1600453413.400000) canx 0cb#0000008f01a40000";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> bytes = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+        String timestamp = CANEnumParser.parseTimestamp(CANMessage);
+        System.out.println(dataBytes);
+        
+        List<String> expected = Arrays.asList(timestamp, "143", "true", "false", "false");
+
+        List<String> result = CANEnumParser.determineConcreteData(testLists.get(1), testLists.get(2), bytes, timestamp);
+
+        assertEquals(expected, result);
+    }
+
+    //float, float
+    @Test
+    public void testDetermineConcreteData5() {
+        String CANMessage = "(1600453413.400000) canx 0d9#00a00f4300000000";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> bytes = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+        String timestamp = CANEnumParser.parseTimestamp(CANMessage);
+        System.out.println(dataBytes);
+        
+        List<String> expected = Arrays.asList(timestamp, "143.625", "0.0");
+
+        List<String> result = CANEnumParser.determineConcreteData(testLists.get(1), testLists.get(2), bytes, timestamp);
+
+        assertEquals(expected, result);
+    }
+    
+    //uint16_t,bool:1,bool:1,bool:1,bool:1,bool:1,bool:1, uint8_t: 2, uint8_t, uint16_t, uint8_t, uint8_t
+    @Test
+    public void testDetermineConcreteData6() {
+        String CANMessage = "(1600453413.104000) canx 4a1#1000000000000000";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> bytes = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+        String timestamp = CANEnumParser.parseTimestamp(CANMessage);
+        System.out.println(dataBytes);
+        
+        List<String> expected = Arrays.asList(timestamp,"4096", "false", "false", "false", "false", "false", "false", "0", "0", "0", "0", "0");
+
+        List<String> result = CANEnumParser.determineConcreteData(testLists.get(1), testLists.get(2), bytes, timestamp);
+
+        assertEquals(expected, result);
+    }
+    //mode (enum)
+    @Test
+    public void testDetermineConcreteData7() {
+        String CANMessage = "(1600453413.400000) canx 25a#0014d576b3de9876";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> bytes = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+        String timestamp = CANEnumParser.parseTimestamp(CANMessage);
+        System.out.println(dataBytes);
+        
+        List<String> expected = Arrays.asList(timestamp,"WSC");
+
+        List<String> result = CANEnumParser.determineConcreteData(testLists.get(1), testLists.get(2), bytes, timestamp);
+
+        assertEquals(expected, result);
+    }
+    //BMSState, IMDState, BMSCoolingLimit, OnOff, OnOff, OnOff, BMSError, bool
+    //TO DO
+    @Test
+    public void testDetermineConcreteData8() {
+        String CANMessage = "(1600453413.400000) canx 00a#0303010101020001";
+        int ID = CANEnumParser.parseID(CANMessage);
+        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
+        String dataBytes = CANEnumParser.parseDataString(CANMessage);
+        List<String> bytes = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
+        String timestamp = CANEnumParser.parseTimestamp(CANMessage);
+        System.out.println(dataBytes);
+        
+        List<String> expected = Arrays.asList(timestamp,"Active", "Operational", "Discharging", "Off", "Off", "On", "None", "true");
+
+        List<String> result = CANEnumParser.determineConcreteData(testLists.get(1), testLists.get(2), bytes, timestamp);
+
+        assertEquals(expected, result);
+    }
     /*
     @Test
     public void testDetermineBitsSignalName() {

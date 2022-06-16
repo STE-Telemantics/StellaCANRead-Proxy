@@ -10,7 +10,7 @@ import java.util.*;
 import com.ste.emreparser.*;
 
 import java.math.BigInteger;
-import java.util.Date;
+//import java.util.Date;
 import java.util.HashSet;
 import java.util.Collections;
 
@@ -72,7 +72,7 @@ public class CANEnumParser {
 	 * @return A HashMap containing the Enum classname as the key, and another Hashmap containing a String denoting
 	 * the bitsequence as the key and a String denoting the statename as the value
 	 */
-	public HashMap<String, HashMap<String, String>> parseTypedef() {
+	public static HashMap<String, HashMap<String, String>> parseTypedef() {
 
 		HashMap<String, HashMap<String, String>> parsedEnums = new HashMap<>();
 
@@ -388,7 +388,7 @@ public class CANEnumParser {
 						dataBytes = dataBytes.substring(16);
 					} else {
 						String temp = dataBytes.substring(8, 16);
-						temp.concat(dataBytes.substring(0,8));
+						temp = temp.concat(dataBytes.substring(0,8));
 						result.add(temp);
 
 						dataBytes = dataBytes.substring(16);
@@ -400,7 +400,7 @@ public class CANEnumParser {
 						result.add(dataBytes.substring(0,11));
 					} else {
 						String temp = dataBytes.substring(3,11);
-						temp.concat(dataBytes.substring(0,3));
+						temp = temp.concat(dataBytes.substring(0,3));
 						result.add(temp);
 					}
 					dataBytes = dataBytes.substring(11);
@@ -412,9 +412,9 @@ public class CANEnumParser {
 						dataBytes = dataBytes.substring(32);
 					} else {
 						String temp = dataBytes.substring(24,32);
-						temp.concat(dataBytes.substring(16,24));
-						temp.concat(dataBytes.substring(8,16));
-						temp.concat(dataBytes.substring(0,8));
+						temp = temp.concat(dataBytes.substring(16,24));
+						temp = temp.concat(dataBytes.substring(8,16));
+						temp = temp.concat(dataBytes.substring(0,8));
 						result.add(temp);
 					}
 					break;
@@ -425,13 +425,13 @@ public class CANEnumParser {
 						result.add(dataBytes);//is the only variable in the data, so string dataBytes does not need to be trimmed
 					} else {
 						String temp = dataBytes.substring(56,64);
-						temp.concat(dataBytes.substring(48,56));
-						temp.concat(dataBytes.substring(40,48));
-						temp.concat(dataBytes.substring(32,40));
-						temp.concat(dataBytes.substring(24,32));
-						temp.concat(dataBytes.substring(16,24));
-						temp.concat(dataBytes.substring(8,16));
-						temp.concat(dataBytes.substring(0,8));
+						temp = temp.concat(dataBytes.substring(48,56));
+						temp = temp.concat(dataBytes.substring(40,48));
+						temp = temp.concat(dataBytes.substring(32,40));
+						temp = temp.concat(dataBytes.substring(24,32));
+						temp = temp.concat(dataBytes.substring(16,24));
+						temp = temp.concat(dataBytes.substring(8,16));
+						temp = temp.concat(dataBytes.substring(0,8));
 						result.add(temp);
 					}
 					break;
@@ -441,26 +441,29 @@ public class CANEnumParser {
 						result.add(dataBytes.substring(0,48));
 					} else {
 						String temp = dataBytes.substring(40,48);
-						temp.concat(dataBytes.substring(32,40));
-						temp.concat(dataBytes.substring(24,32));
-						temp.concat(dataBytes.substring(16,24));
-						temp.concat(dataBytes.substring(8,16));
+						temp = temp.concat(dataBytes.substring(32,40));
+						temp = temp.concat(dataBytes.substring(24,32));
+						temp = temp.concat(dataBytes.substring(16,24));
+						temp = temp.concat(dataBytes.substring(8,16));
 						result.add(temp);
 					}
 					dataBytes = dataBytes.substring(48);
 					break;
 
 				case "float":
-					if (endianness > 0) {
+				//for an unknown reason the endianness-logic works the opposite way for floats,
+				//so we add a '!' to the if clause
+					if (!(endianness > 0)) { 
 					result.add(dataBytes.substring(0,32));
-					dataBytes = dataBytes.substring(32);
 					} else {
 						String temp = dataBytes.substring(24,32);
-						temp.concat(dataBytes.substring(16,24));
-						temp.concat(dataBytes.substring(8,16));
-						temp.concat(dataBytes.substring(0,8));
+						temp = temp.concat(dataBytes.substring(16,24));
+						temp = temp.concat(dataBytes.substring(8,16));
+						temp = temp.concat(dataBytes.substring(0,8));
+						System.out.println(temp);
 						result.add(temp);
 					}
+					dataBytes = dataBytes.substring(32);
 					break;
 
 				default:
@@ -520,7 +523,7 @@ public class CANEnumParser {
         printUniqueTypes(allTypes);
     }
 
-	HashMap<String, HashMap<String, String>> enums = parseTypedef(); //the hashmap of enums with their corresponding byte sequence. See overview on the drive for details.
+	private static HashMap<String, HashMap<String, String>> enums = parseTypedef(); //the hashmap of enums with their corresponding byte sequence. See overview on the drive for details.
 
 	/* Finally, we use the hashmap created by determineBits() to determine what state the bytesequence
 	on the left partains. The integers and booleans all have set bit/byte sequences (see top of this java file),
@@ -542,18 +545,18 @@ public class CANEnumParser {
 
 	As for what the lists are, please refer to the overview on google drive.
 	*/
-	public List<String> determineConcreteData(List<String> l1, List<String> l2, List<String> l3) {
+	public static List<String> determineConcreteData(List<String> l1, List<String> l2, List<String> l3, String timestamp) {
 
 		List<String> result = new ArrayList<>();
 
-		for(int i = 0; i < l1.size() + 1; i++) {
+		for(int i = 0; i < l1.size(); i++) {
 			String dataType = l1.get(i);
 			String bytes = l3.get(i);
 
 			switch (dataType.replaceAll(" ", "")) {
 
 				case "String"://timestamp
-					result.add("null");
+					result.add(timestamp);
 					break;
 
 				case "bool": //8 bits
@@ -575,9 +578,21 @@ public class CANEnumParser {
 				case "uint8_t":
 					result.add(Integer.toString(Integer.parseInt(bytes, 2)));
 					break;
+				
+				case "uint8_t:2":
+					result.add(Integer.toString(Integer.parseInt(bytes,2)));
+					break;
+
+				case "uint8_t:6":
+					result.add(Integer.toString(Integer.parseInt(bytes,2)));
+					break;
 
 				case "uint16_t":
 					result.add(Integer.toString(Integer.parseInt(bytes, 2)));
+					break;
+
+				case "uint16_t:11":
+					result.add(Integer.toString(Integer.parseInt(bytes,2)));
 					break;
 
 				case "uint32_t":
@@ -586,6 +601,10 @@ public class CANEnumParser {
 
 				case "uint64_t":
 					result.add(Integer.toString(Integer.parseInt(bytes, 2)));
+					break;
+
+				case "uint64_t:48":
+					result.add(Integer.toString(Integer.parseInt(bytes,2)));
 					break;
 
 				case "int8_t":
@@ -651,6 +670,12 @@ public class CANEnumParser {
 	}
 
 	public static void main(String[] args) {
+		String bytes = "00000000101000000000111101000011";
+		int intBits = Integer.parseInt(bytes, 2);
+		Float floatValue = Float.intBitsToFloat(intBits);
+		String floatStringValue = floatValue.toString();
+
+		System.out.println(floatStringValue);
 	}
 
 }
