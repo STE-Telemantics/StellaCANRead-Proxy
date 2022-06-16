@@ -329,13 +329,12 @@ public class CANEnumParser {
 
 					if (count == 0) { //No consecutive "bool:1"s, thus only the least significant bit of the left-most byte is relevant.
 						result.add(dataBytes.substring(7,8));
-							dataBytes = dataBytes.substring(8);
+						dataBytes = dataBytes.substring(8);
 
 					} else { //multiple consecutive "bool:1"s
 						int beginIndex = 7;
 						int endIndex = 8;
 						for (int k = 0; k < count+1; k++) {
-							System.out.println("substring = " + dataBytes.substring(beginIndex, endIndex));
 							result.add(dataBytes.substring(beginIndex, endIndex));
 							beginIndex--;
 							endIndex--;
@@ -360,7 +359,7 @@ public class CANEnumParser {
 								String split0 = dataBytes.substring(0,(8 - ((count+1)%8))); 
 								String split1 = dataBytes.substring(8);
 								dataBytes = split0.concat(split1);
-							} else{
+							} else {
 								dataBytes = dataBytes.substring(8);
 							}
 						} 

@@ -278,45 +278,32 @@ public class CANUnitTests {
 
         assertEquals(expected, result);
     }
-    //TO DO
+    //mode (enum)
     @Test
     public void testDetermineBits7() {
-        String CANMessage = "(1600453413.400000) canx 0cb#0000008f01a40000";
+        String CANMessage = "(1600453413.400000) canx 25a#0014d576b3de9876";
         int ID = CANEnumParser.parseID(CANMessage);
         List<List<String>> testLists = CANEnumParser.parseOverview(ID);
         String dataBytes = CANEnumParser.parseDataString(CANMessage);
-        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000000000000000000000010001111", "00000001", "0", "0");
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000000");
 
         List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
 
         assertEquals(expected, result);
     }
-    //TO DO
+    //BMSState, IMDState, BMSCoolingLimit, OnOff, OnOff, OnOff, BMSError, bool
     @Test
     public void testDetermineBits8() {
-        String CANMessage = "(1600453413.400000) canx 0cb#0000008f01a40000";
+        String CANMessage = "(1600453413.400000) canx 00a#0303010101020001";
         int ID = CANEnumParser.parseID(CANMessage);
         List<List<String>> testLists = CANEnumParser.parseOverview(ID);
         String dataBytes = CANEnumParser.parseDataString(CANMessage);
-        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000000000000000000000010001111", "00000001", "0", "0");
-
+        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000011", "00000011", "00000001", "00000001", "00000001", "00000010", "00000000", "00000001");
         List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
 
         assertEquals(expected, result);
     }
-    //TO DO
-    @Test
-    public void testDetermineBits9() {
-        String CANMessage = "(1600453413.400000) canx 0cb#0000008f01a40000";
-        int ID = CANEnumParser.parseID(CANMessage);
-        List<List<String>> testLists = CANEnumParser.parseOverview(ID);
-        String dataBytes = CANEnumParser.parseDataString(CANMessage);
-        List<String> expected = Arrays.asList(CANEnumParser.parseTimestamp(CANMessage),"00000000000000000000000010001111", "00000001", "0", "0");
 
-        List<String> result = CANEnumParser.determineBits(testLists.get(1), testLists.get(2), dataBytes, Integer.parseInt(testLists.get(3).get(0)));
-
-        assertEquals(expected, result);
-    }
     /*
     @Test
     public void testDetermineBitsSignalName() {
