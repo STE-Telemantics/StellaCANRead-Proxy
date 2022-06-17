@@ -39,7 +39,9 @@ public class CANParser {
         try {
             // THe default path where the format file resides. May be overridden if the
             // filechooser is used
+            //uncomment the one below if you want to test CANEnumParser manually or run Main.java
             String filename = "stellacanread-proxy/src/main/resources/messages.csv";
+//            String filename = "src/main/resources/messages.csv";
 
             // Read in the filename depending on whether we want to choose a file or just
             // use the default one
@@ -128,9 +130,16 @@ public class CANParser {
 
         try {
             // Instantiate a CSVReader object and use it to read the default typedefs file
+/* 
+            reader = new CSVReaderBuilder(
+                    new FileReader("src/main/resources/typedefs.csv"))
+                    .withCSVParser(new CSVParserBuilder().withSeparator(',').build())
+                    .build();
+*/
+//Comment below and uncomment above if you want to test CANEnumParser manually or if you want to run Main.java
             reader = new CSVReaderBuilder(
                     new FileReader("stellacanread-proxy/src/main/resources/typedefs.csv"))
-                    .withCSVParser(new CSVParserBuilder().withSeparator(',').build())
+                   .withCSVParser(new CSVParserBuilder().withSeparator(',').build())
                     .build();
 
             // Create two variables that will hold our csv lines. The arraylist will store
