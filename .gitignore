@@ -11,5 +11,6 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 
 .vscode/
+
 src/main/resources/era_zolder_vrijdag.scl
 stellacanread-proxy/src/main/resources/era_zolder_vrijdag.scl

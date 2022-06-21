@@ -205,7 +205,6 @@ public class CANEnumParser {
 		String idInHex = split2[0]; // take the 'left side' after splitting "12d#01c90100a819d400" on "#"
 		int ID = Integer.parseInt(idInHex, 16);
 
-		System.out.println(ID);
 		return ID;
 	}
 
