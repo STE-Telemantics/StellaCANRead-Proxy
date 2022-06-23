@@ -8,8 +8,6 @@ import java.util.*;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.Producer;
 
@@ -47,6 +45,8 @@ public class Main {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
                 "org.apache.kafka.common.serialization.StringSerializer");
+        props.put(ProducerConfig.ACKS_CONFIG, 1);
+        props.put(ProducerConfig.LINGER_MS_CONFIG, 10);
 
         Producer<String, String> producer = new KafkaProducer<String, String>(props);
         // Open the .scl file
@@ -72,20 +72,7 @@ public class Main {
 
                 producer.send(
                         new ProducerRecord<String, String>((String) obj.get("name"), 0, (Long) obj.get("timestamp"),
-                                key, record));// ,
-                // new Callback() {
-                // @Override
-                // public void onCompletion(RecordMetadata m, Exception e) {
-                // if (e != null) {
-                // e.printStackTrace();
-                // } else {
-                // System.out.printf("Produced record to topic %s partition [%d] @ offset %d%n",
-                // m.topic(),
-                // m.partition(),
-                // m.offset());
-                // }
-                // }
-                // });
+                                key, record));
 
                 while (System.currentTimeMillis() < start + 000L) {
                     // Do nothing
