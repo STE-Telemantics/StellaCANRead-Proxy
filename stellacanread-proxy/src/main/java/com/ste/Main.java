@@ -48,6 +48,9 @@ public class Main {
         props.put(ProducerConfig.ACKS_CONFIG, "1");
         props.put(ProducerConfig.LINGER_MS_CONFIG, 10);
 
+        //historical topic
+        String his_topic = "historical_test";
+
         Producer<String, String> producer = new KafkaProducer<String, String>(props);
         // Open the .scl file
 
@@ -72,6 +75,10 @@ public class Main {
 
                 producer.send(
                         new ProducerRecord<String, String>((String) obj.get("name"), 0, (Long) obj.get("timestamp"),
+                                key, record));
+
+                producer.send(
+                        new ProducerRecord<String, String>(his_topic, 0, (Long) obj.get("timestamp"),
                                 key, record));
 
                 while (System.currentTimeMillis() < start + 000L) {
