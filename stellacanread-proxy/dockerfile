@@ -1,0 +1,19 @@
+# Pull base image
+FROM maven:3.8.6-jdk-8 as maven
+
+# Copy project object model and source files into image
+COPY ./pom.xml ./pom.xml
+COPY ./src ./src
+
+# Install maven dependencies and set up maven project
+RUN mvn dependency:go-offline -B
+RUN mvn package
+
+# Pull minimized version of Java image
+FROM openjdk:8u171-jre-alpine
+
+# Copy main.java file into the image
+COPY --from=maven target/Main-*.jar ./src/main/java/com/ste/Main.jar
+
+# Run main.java to run the desired functionality
+CMD ["java", "-jar", "./src/main/java/com/ste/Main.jar"]
