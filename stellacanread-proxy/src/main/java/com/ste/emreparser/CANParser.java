@@ -50,7 +50,7 @@ public class CANParser {
             // filechooser is used
             // uncomment the one below if you want to test CANEnumParser manually or run
             // Main.java
-            String filename = "stellacanread-proxy/src/main/resources/messages.csv";
+            String filename = "messages.csv";
             // String filename = "src/main/resources/messages.csv";
 
             // Read in the filename depending on whether we want to choose a file or just
@@ -149,7 +149,7 @@ public class CANParser {
             // Comment below and uncomment above if you want to test CANEnumParser manually
             // or if you want to run Main.java
             reader = new CSVReaderBuilder(
-                    new FileReader("stellacanread-proxy/src/main/resources/typedefs.csv"))
+                    new FileReader("typedefs.csv"))
                     .withCSVParser(new CSVParserBuilder().withSeparator(',').build())
                     .build();
 

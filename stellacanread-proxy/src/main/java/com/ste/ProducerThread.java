@@ -21,6 +21,8 @@ import org.apache.kafka.clients.admin.NewTopic;
 
 import org.apache.kafka.common.errors.TopicExistsException;
 
+import io.confluent.ksql.api.client.ExecuteStatementResult;
+
 import org.json.simple.JSONObject;
 
 import com.ste.specificationstuff.CANEnumParser;
@@ -60,6 +62,7 @@ public class ProducerThread extends Thread {
         }
     }
 
+    @SuppressWarnings({ "unchecked" })
     public void run() {
         try {
             InputStream input = socket.getInputStream();
@@ -85,53 +88,36 @@ public class ProducerThread extends Thread {
                 // Parse the CAN Message into an interpretable JSON object
                 JSONObject obj = interpretMessage(canMessage);
 
-                System.out.println(obj);
-
                 // Something went wrong during parsing, skip this message
                 if (obj == null) {
                     continue;
                 }
-
-                // System.out.println(obj.toJSONString());
-
-                // System.out.print(obj.toString());
 
                 // Get the topic for which this message is produced
                 String topic = (String) obj.get("name");
 
                 // Ensure the topic already exists in Confluent
                 if (!topics.contains(topic)) {
-                    // Add it if it doesn't, create it
                     createTopic(topic);
                 }
 
+                System.out.println(obj);
+
                 // Parse our JSON Object to string
-                String record = obj.toJSONString();
+                JSONObject record = new JSONObject();
+                record.put("key", key);
+                record.put("name", topic);
+                record.put("timestamp", obj.get("timestamp"));
+                record.put("value", obj.toJSONString());
 
                 // And put it into Kafka
                 producer.send(
                         new ProducerRecord<String, String>(topic, 0, (Long) obj.get("timestamp"),
-                                key, record));
-
-                JSONObject historicalJsonObject = new JSONObject();
-                historicalJsonObject.put("key", key);
-                historicalJsonObject.put("name", topic);
-                historicalJsonObject.put("timestamp", obj.get("timestamp"));
-                historicalJsonObject.put("value", obj.toJSONString());
-
-                String historicTopic = "historical_test";
-
-                if (!topics.contains(historicTopic)) {
-                    createTopic(historicTopic);
-                }
-
-                String historicRecord = historicalJsonObject.toJSONString();
-                producer.send(
-                        new ProducerRecord<String, String>(historicTopic, 0, (Long) obj.get("timestamp"),
-                                key, historicRecord));
+                                key, record.toJSONString()));
             }
 
             // Close the socket
+            producer.close();
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -141,7 +127,7 @@ public class ProducerThread extends Thread {
     private Properties loadProperties() {
         Properties p = new Properties();
         try {
-            p = loadConfig("stellacanread-proxy/target/classes/java.config");
+            p = loadConfig("java.config");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -159,7 +145,6 @@ public class ProducerThread extends Thread {
 
     @SuppressWarnings({ "unchecked" })
     private JSONObject interpretMessage(String CANMessage) {
-        long startTime = System.currentTimeMillis();
         int ID = CANEnumParser.parseID(CANMessage);
         String timestamp = CANEnumParser.parseTimestamp(CANMessage);
         String dataBytes = CANEnumParser.parseDataString(CANMessage);
@@ -182,14 +167,13 @@ public class ProducerThread extends Thread {
             obj.put(variableNames.get(i), values.get(i));
         }
 
-        long endTime = System.currentTimeMillis();
-
         // System.out.println("Interpreting took: " + (endTime - startTime) + "ms");
         return obj;
     }
 
     // Create topic in Confluent Cloud
     private void createTopic(final String topic) {
+        // First create the topic in the Confluent Cloud
         final NewTopic newTopic = new NewTopic(topic, Optional.of(2), Optional.empty());
 
         try {
@@ -199,12 +183,24 @@ public class ProducerThread extends Thread {
             if (!(e.getCause() instanceof TopicExistsException)) {
                 throw new RuntimeException(e);
             }
-            return;
+        }
+
+        // Then create a KSQLDB Stream to be able to quickly query the data
+        String streamCreate = String
+                .format("CREATE STREAM %s (key VARCHAR KEY, name VARCHAR, timestamp BIGINT, value VARCHAR) "
+                        + "WITH (KAFKA_TOPIC = '%s', VALUE_FORMAT = 'JSON');", topic, topic);
+
+        try {
+            ExecuteStatementResult result = Main.ksqlDBClient.executeStatement(streamCreate).get();
+            System.out.println(result.toString());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
         }
 
         // The topic was added succesfully, add it to our list of topics to ensure we
         // don't try to add it again
         topics.add(topic);
+        return;
     }
 
     private Properties loadConfig(final String configFile) throws IOException {

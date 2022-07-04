@@ -17,10 +17,27 @@
     <!-- JaCoCo thresholds. Increase gradually as you add tests. -->
     <jacoco.unit-tests.limit.instruction-ratio>0%</jacoco.unit-tests.limit.instruction-ratio>
     <jacoco.unit-tests.limit.branch-ratio>0%</jacoco.unit-tests.limit.branch-ratio>
-    <jacoco.unit-tests.limit.class-complexity>100</jacoco.unit-tests.limit.class-complexity>
-    <jacoco.unit-tests.limit.method-complexity>100</jacoco.unit-tests.limit.method-complexity>
+    <jacoco.unit-tests.limit.class-complexity>85</jacoco.unit-tests.limit.class-complexity>
+    <jacoco.unit-tests.limit.method-complexity>30</jacoco.unit-tests.limit.method-complexity>
+    <ksqldb.version>7.1.1</ksqldb.version>
   </properties>
-  <dependencies> <!-- DEPENDENCIES -->
+
+  <repositories>
+    <repository>
+      <id>confluent</id>
+      <url>https://packages.confluent.io/maven/</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>confluent</id>
+      <url>https://packages.confluent.io/maven/</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <dependencies>
+    <!-- DEPENDENCIES -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -46,17 +63,61 @@
     </dependency>
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
-		  <artifactId>json-simple</artifactId>
-		  <version>1.1.1</version>
+      <artifactId>json-simple</artifactId>
+      <version>1.1.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka-clients</artifactId>
       <version>3.2.0</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-streams -->
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-streams</artifactId>
+      <version>3.2.0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/io.confluent.ksql/ksqldb-common -->
+    <dependency>
+      <groupId>io.confluent.ksql</groupId>
+      <artifactId>ksqldb-common</artifactId>
+      <version>7.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>io.confluent.ksql</groupId>
+      <artifactId>ksqldb-api-client</artifactId>
+      <version>${ksqldb.version}</version>
+    </dependency>
   </dependencies> <!-- END DEPENDENCIES-->
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.2.2</version>
+        <configuration>
+          <archive>
+            <index>true</index>
+            <manifest>
+              <mainClass>com.ste.Main</mainClass>
+              <addClasspath>true</addClasspath>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.ste.Main</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
