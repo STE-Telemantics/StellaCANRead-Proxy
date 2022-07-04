@@ -1,19 +1,20 @@
 package com.ste;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.*;
-import java.util.concurrent.ExecutionException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Properties;
 
 import io.confluent.ksql.api.client.Client;
 import io.confluent.ksql.api.client.ClientOptions;
 
 public class Main {
 
+    // Create a ksqlDB client
     public static Client ksqlDBClient;
-
-    // Set the host and the port for the ksqlDB cluster
-    public static String KSQLDB_SERVER_HOST = "pksqlc-03n59.westeurope.azure.confluent.cloud";
-    public static int KSQLDB_SERVER_HOST_PORT = 443;
 
     public static void main(String[] args) {
         System.out.println("Opened server");
@@ -26,12 +27,22 @@ public class Main {
             port = 5000;
         }
 
+        Properties ksqlProps = new Properties();
+
+        try {
+            ksqlProps = loadConfig("ksql.config");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Could not open ksql.config file!");
+            return;
+        }
+
         // Initialize ksqlDB client
         ClientOptions options = ClientOptions.create()
-                .setBasicAuthCredentials("BR575ST7TIPP2IAC",
-                        "KpbOy9WNWq7hwG+hTK+RJnWF0kLwuBGvTrPNpkSTviTuIn21Tys2wY+p83wkOIcU")
-                .setExecuteQueryMaxResultRows(Integer.MAX_VALUE).setHost(KSQLDB_SERVER_HOST)
-                .setPort(KSQLDB_SERVER_HOST_PORT)
+                .setBasicAuthCredentials(ksqlProps.getProperty("username"),
+                        ksqlProps.getProperty("password"))
+                .setExecuteQueryMaxResultRows(Integer.MAX_VALUE).setHost(ksqlProps.getProperty("host"))
+                .setPort(Integer.parseInt(ksqlProps.getProperty("port")))
                 .setUseTls(true).setUseAlpn(true);
         ksqlDBClient = Client.create(options);
 
@@ -53,5 +64,17 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static Properties loadConfig(final String configFile) throws IOException {
+        if (!Files.exists(Paths.get(configFile))) {
+            throw new IOException(configFile + " not found.");
+        }
+
+        final Properties cfg = new Properties();
+        try (InputStream inputStream = new FileInputStream(configFile)) {
+            cfg.load(inputStream);
+        }
+        return cfg;
     }
 }

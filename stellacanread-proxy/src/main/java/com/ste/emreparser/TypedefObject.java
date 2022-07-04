@@ -13,7 +13,8 @@ import java.util.regex.Pattern;
  * 2. A code
  * 3. A description
  *
- * These values are stored in this object, together with the individiual states each typedef can take.
+ * These values are stored in this object, together with the individiual states
+ * each typedef can take.
  */
 public class TypedefObject {
 
@@ -22,7 +23,8 @@ public class TypedefObject {
     private String code;
     private String description;
 
-    // We also do some extra parsing to extract more information from the code variable
+    // We also do some extra parsing to extract more information from the code
+    // variable
     private String codeType;
     private String[] codeStates;
 
@@ -42,7 +44,7 @@ public class TypedefObject {
         System.out.println("| Pretty printing all values for " + this.name.toUpperCase());
         System.out.println("| +++++++++++++++++++++++++++++++++++++++++++++++++++++");
         System.out.println("| Type: " + this.codeType);
-        System.out.print("| States: " );
+        System.out.print("| States: ");
         for (String cs : codeStates) {
             System.out.print(cs + " ");
         }
@@ -56,11 +58,12 @@ public class TypedefObject {
         // Check for the type
         if (this.code.contains("uint8_t")) {
             this.codeType = "uint8_t";
-        }  else {
+        } else {
             throw new IllegalArgumentException("Type not recognized");
         }
 
-        // Extract the states from the code using a regular expression, which have the format "{state1, state2, state3, ...}"
+        // Extract the states from the code using a regular expression, which have the
+        // format "{state1, state2, state3, ...}"
         String pattern = "[{](.*)[}]";
         Pattern r = Pattern.compile(pattern);
 
@@ -96,5 +99,5 @@ public class TypedefObject {
         return this.description;
     }
 
-    //TODO: maybe also implement setters for name, code and description
+    // TODO: maybe also implement setters for name, code and description
 }

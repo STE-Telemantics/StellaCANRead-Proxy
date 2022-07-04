@@ -5,15 +5,18 @@ package com.ste.emreparser;
  * a "CAN_overview_2019_17-format.csv" file
  *
  * A single message consists of 16 different fields, which are the following:
- * id - name - DataNames - DataTypes - DataUnits - Standard Values - Log - PutToCan1 - PutToCan2 -
- * Description - Sender - Receiver - ToStrat - ToVis - NotToDB - Convert Endiannes
+ * id - name - DataNames - DataTypes - DataUnits - Standard Values - Log -
+ * PutToCan1 - PutToCan2 -
+ * Description - Sender - Receiver - ToStrat - ToVis - NotToDB - Convert
+ * Endiannes
  *
- * These individual fields can be requested by calling the corresponding getter method.
+ * These individual fields can be requested by calling the corresponding getter
+ * method.
  *
  * No additional processing is done on these fields.
  */
 
-//TODO: Convert this class to make use of the Builder design pattern
+// TODO: Convert this class to make use of the Builder design pattern
 public class MessageObject {
 
     // Declare all fields as String variables
@@ -32,10 +35,12 @@ public class MessageObject {
     private String properties;
     private String sendFrequency;
 
-    // A bit messy, but set up a ParsedMessage object and define its instance variables
-    public MessageObject(String id, String name, String fieldNames, String dataTypes, String units, String defaultValues,
-                         String description, String senders, String receivers, String sendInterval, String convertEndianess,
-                         String type, String properties, String sendFrequency) {
+    // A bit messy, but set up a ParsedMessage object and define its instance
+    // variables
+    public MessageObject(String id, String name, String fieldNames, String dataTypes, String units,
+            String defaultValues,
+            String description, String senders, String receivers, String sendInterval, String convertEndianess,
+            String type, String properties, String sendFrequency) {
         this.id = id;
         this.name = name;
         this.fieldNames = fieldNames.split(",");

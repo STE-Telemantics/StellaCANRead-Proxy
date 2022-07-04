@@ -2,8 +2,6 @@ package com.ste;
 
 import java.io.*;
 import java.net.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -127,7 +125,7 @@ public class ProducerThread extends Thread {
     private Properties loadProperties() {
         Properties p = new Properties();
         try {
-            p = loadConfig("java.config");
+            p = Main.loadConfig("java.config");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -201,17 +199,5 @@ public class ProducerThread extends Thread {
         // don't try to add it again
         topics.add(topic);
         return;
-    }
-
-    private Properties loadConfig(final String configFile) throws IOException {
-        if (!Files.exists(Paths.get(configFile))) {
-            throw new IOException(configFile + " not found.");
-        }
-
-        final Properties cfg = new Properties();
-        try (InputStream inputStream = new FileInputStream(configFile)) {
-            cfg.load(inputStream);
-        }
-        return cfg;
     }
 }
